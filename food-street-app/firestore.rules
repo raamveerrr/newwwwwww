@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read/write their own orders
+    match /orders/{orderId} {
+      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null;
+    }
+    
+    // Menu items can be read by all authenticated users
+    // Only admins can write/update menu items
+    match /menuItems/{itemId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        (request.auth.token.email == 'admin@foodstreet.com' || 
+         request.auth.token.email == 'veerr@example.com');
+    }
+    
+    // Shop data can be read by all authenticated users
+    match /shops/{shopId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        (request.auth.token.email == 'admin@foodstreet.com' || 
+         request.auth.token.email == 'veerr@example.com');
+    }
+  }
+}

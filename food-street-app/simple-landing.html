@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Food Street - Pre-Order System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            animation: fadeIn 1s ease;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.8s ease 0.3s both;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            animation: slideUp 0.8s ease 0.5s both;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            animation: slideUp 0.8s ease 0.7s both;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .stat:hover { transform: translateY(-2px); }
+
+        .shops-section {
+            padding: 80px 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #4facfe 100%);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 3rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .shops-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .shop-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .shop-card:nth-child(1) { animation-delay: 0.2s; }
+        .shop-card:nth-child(2) { animation-delay: 0.4s; }
+        .shop-card:nth-child(3) { animation-delay: 0.6s; }
+        .shop-card:nth-child(4) { animation-delay: 0.8s; }
+
+        .shop-card:hover {
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+            transform: translateY(-10px) scale(1.02);
+        }
+
+        .shop-background {
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .zuzu .shop-background { background: linear-gradient(135deg, #f87171, #ec4899); }
+        .oasis .shop-background { background: linear-gradient(135deg, #4ade80, #10b981); }
+        .bites .shop-background { background: linear-gradient(135deg, #facc15, #f97316); }
+        .shakers .shop-background { background: linear-gradient(135deg, #60a5fa, #a855f7); }
+
+        .shop-emoji {
+            font-size: 4rem;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+            animation: bounce 2s infinite;
+        }
+
+        .shop-info { padding: 1.5rem; }
+
+        .shop-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 0.5rem;
+        }
+
+        .shop-description {
+            color: #718096;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .shop-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .rating, .time {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+            color: #4a5568;
+        }
+
+        .order-button {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 0.875rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .order-button:hover {
+            background: linear-gradient(135deg, #5a67d8, #6b46c1);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2.5rem; }
+            .shops-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+            .section-title { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1 class="hero-title">🍕 College Food Street 🍔</h1>
+        <p class="hero-subtitle">Pre-order your favorite food and skip the queue!</p>
+        <div class="hero-stats">
+            <div class="stat">
+                <span>🛍️</span>
+                <span>1000+ Orders</span>
+            </div>
+            <div class="stat">
+                <span>⏰</span>
+                <span>Fast Delivery</span>
+            </div>
+            <div class="stat">
+                <span>⭐</span>
+                <span>4.8 Rating</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="shops-section">
+        <h2 class="section-title">Choose Your Favorite Shop</h2>
+        
+        <div class="shops-grid">
+            <div class="shop-card zuzu">
+                <div class="shop-background">
+                    <div class="shop-emoji">🍕</div>
+                </div>
+                <div class="shop-info">
+                    <h3 class="shop-name">ZUZU</h3>
+                    <p class="shop-description">Delicious street food & snacks</p>
+                    <div class="shop-meta">
+                        <div class="rating">
+                            <span>⭐</span>
+                            <span>4.8</span>
+                        </div>
+                        <div class="time">
+                            <span>⏰</span>
+                            <span>15-20 min</span>
+                        </div>
+                    </div>
+                    <button class="order-button">Order Now →</button>
+                </div>
+            </div>
+
+            <div class="shop-card oasis">
+                <div class="shop-background">
+                    <div class="shop-emoji">🥗</div>
+                </div>
+                <div class="shop-info">
+                    <h3 class="shop-name">Oasis Kitchen</h3>
+                    <p class="shop-description">Fresh & healthy meals</p>
+                    <div class="shop-meta">
+                        <div class="rating">
+                            <span>⭐</span>
+                            <span>4.6</span>
+                        </div>
+                        <div class="time">
+                            <span>⏰</span>
+                            <span>10-15 min</span>
+                        </div>
+                    </div>
+                    <button class="order-button">Order Now →</button>
+                </div>
+            </div>
+
+            <div class="shop-card bites">
+                <div class="shop-background">
+                    <div class="shop-emoji">🍔</div>
+                </div>
+                <div class="shop-info">
+                    <h3 class="shop-name">Bites and Bites</h3>
+                    <p class="shop-description">Quick bites & beverages</p>
+                    <div class="shop-meta">
+                        <div class="rating">
+                            <span>⭐</span>
+                            <span>4.7</span>
+                        </div>
+                        <div class="time">
+                            <span>⏰</span>
+                            <span>5-10 min</span>
+                        </div>
+                    </div>
+                    <button class="order-button">Order Now →</button>
+                </div>
+            </div>
+
+            <div class="shop-card shakers">
+                <div class="shop-background">
+                    <div class="shop-emoji">🥤</div>
+                </div>
+                <div class="shop-info">
+                    <h3 class="shop-name">Shakers and Movers</h3>
+                    <p class="shop-description">Refreshing drinks & shakes</p>
+                    <div class="shop-meta">
+                        <div class="rating">
+                            <span>⭐</span>
+                            <span>4.9</span>
+                        </div>
+                        <div class="time">
+                            <span>⏰</span>
+                            <span>5-8 min</span>
+                        </div>
+                    </div>
+                    <button class="order-button">Order Now →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
