@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom'
 import { AuthProvider, useAuth } from './AuthContext'
 import { CartProvider } from './CartContext'
-import { TokenProvider } from './TokenContext'
+import { TokenProvider, useToken } from './TokenContext'
 import ErrorBoundary from './ErrorBoundary'
 import Login from './Login'
 import Signup from './Signup'
@@ -16,6 +16,7 @@ import Admin from './Admin'
 import Cart from './Cart'
 import MobileNavigation from './MobileNavigation'
 import TokenDisplay from './TokenDisplay'
+import TokenListDisplay from './TokenListDisplay'
 import { usePullToRefresh } from './hooks/usePullToRefresh'
 // Policy Pages
 import PrivacyPolicy from './PrivacyPolicy'
@@ -122,9 +123,7 @@ const shops = [
 // Landing Page Component with Pull-to-Refresh
 function LandingPage() {
   const { currentUser, userProfile, logout } = useAuth()
-  const { hasActiveOrder, latestOrder, showTokenDialog, openTokenDialog, closeTokenDialog, getShopToken, setShopToken } = useToken()
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
-  const [selectedShopForToken, setSelectedShopForToken] = useState(null)
 
   // Pull-to-refresh functionality - only refreshes when at very top
   const handleRefresh = async () => {
@@ -162,30 +161,7 @@ function LandingPage() {
     }
   }
 
-  const handleTokenClick = (shopId) => {
-    const shop = shops.find(s => s.id === shopId)
-    const existingToken = getShopToken(shopId)
 
-    if (existingToken) {
-      // Show existing token
-      setSelectedShopForToken({ ...shop, token: existingToken })
-      openTokenDialog()
-    } else {
-      // Generate new token
-      const newToken = `TK${shopId}${Date.now().toString().slice(-4)}`
-      const tokenData = {
-        shopName: shop.name,
-        shopId: shop.id,
-        items: [],
-        total: 0,
-        token: newToken,
-        timestamp: new Date().toISOString()
-      }
-      setShopToken(shopId, tokenData)
-      setSelectedShopForToken({ ...shop, token: tokenData })
-      openTokenDialog()
-    }
-  }
 
   // Show admin dashboard for admin users
   if (userProfile?.userType === 'admin') {
@@ -289,9 +265,6 @@ function LandingPage() {
                 </div>
                 
                 <div className="shop-buttons">
-                  <button className="token-button" onClick={() => handleTokenClick(shop.id)}>
-                    🎫 Token
-                  </button>
                   <button className="order-button" onClick={() => handleOrderClick(shop.id)}>
                     View Menu
                     <span className="arrow-icon">→</span>
@@ -354,13 +327,7 @@ function LandingPage() {
         onCancel={handleLogoutCancel}
       />
 
-      {/* Token Dialog */}
-      {showTokenDialog && selectedShopForToken && selectedShopForToken.token && (
-        <TokenDisplay
-          orderData={selectedShopForToken.token}
-          onClose={closeTokenDialog}
-        />
-      )}
+
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useCart } from './CartContext'
 import { useAuth } from './AuthContext'
-import { useToken } from './TokenContext'
+import { useTokenContext } from './TokenContext'
 import { razorpayConfig, getRazorpayKey, verifyPayment, isDevelopmentMode, mockPayment } from './razorpayConfig'
 import { printerService } from './PrinterService'
 import PaymentSuccess from './PaymentSuccess'
@@ -12,7 +12,7 @@ import './Checkout.css'
 function Checkout({ isOpen, onClose, onOrderSuccess }) {
   const { cartItems, getTotalPrice, clearCart } = useCart()
   const { currentUser } = useAuth()
-  const { setNewOrder } = useToken()
+  const { setNewOrder, addShopToken } = useTokenContext()
   const [isProcessing, setIsProcessing] = useState(false)
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false)
   const [completedOrder, setCompletedOrder] = useState(null)
@@ -35,6 +35,9 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
   if (showPaymentSuccess && completedOrder) {
     return <PaymentSuccess orderData={completedOrder} isOpen={showPaymentSuccess} onClose={handlePaymentSuccessClose} />
   }
+
+  // Remove token-related code from cart after payment success
+  // Instead, add token to TokenContext for the specific shop
 
   const handleInputChange = (e) => {
     setCustomerInfo({
@@ -205,7 +208,10 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
                                window.location.hostname.includes('digitalfoodstreet')
     
     // Check if we should use mock payment (development mode)
-    if (isDevelopmentMode() && !isNetlifyProduction) {
+    // TEMPORARILY DISABLED: Force real Razorpay for testing
+    const FORCE_REAL_RAZORPAY = true // Set to false to use mock payments
+
+    if (isDevelopmentMode() && !isNetlifyProduction && !FORCE_REAL_RAZORPAY) {
       console.log('🧪 Development mode detected - using mock payment')
       
       try {
@@ -250,12 +256,41 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
                   orderNumber: `FS${Date.now()}`
                 }
                 
-                // Store order in token context for later access
-                setNewOrder(completedOrderData)
+                // Add tokens to each shop that has items in the order
+                const shopTokens = {}
+                completedOrderData.items.forEach(item => {
+                  if (!shopTokens[item.shopId]) {
+                    shopTokens[item.shopId] = {
+                      shopName: item.shopName,
+                      shopId: item.shopId,
+                      items: [],
+                      totalAmount: 0
+                    }
+                  }
+                  shopTokens[item.shopId].items.push(item)
+                  shopTokens[item.shopId].totalAmount += item.price * item.quantity
+                })
+
+                // Add token to each shop
+                Object.values(shopTokens).forEach(shopData => {
+                  const shopTokenData = {
+                    tokenNumber: completedOrderData.tokenNumber,
+                    shopName: shopData.shopName,
+                    shopId: shopData.shopId,
+                    items: shopData.items,
+                    totalAmount: shopData.totalAmount,
+                    orderStatus: 'confirmed',
+                    customerInfo: completedOrderData.customerInfo,
+                    firestoreOrderId: completedOrderData.firestoreOrderId,
+                    timestamp: new Date().toISOString()
+                  }
+                  addShopToken(shopData.shopId, shopTokenData)
+                })
+
                 setCompletedOrder(completedOrderData)
                 clearCart() // Clear cart immediately after successful payment
                 onOrderSuccess(completedOrderData)
-                
+
                 // Show payment success dialog
                 setShowPaymentSuccess(true)
               } else {
@@ -263,7 +298,8 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
               }
             } catch (paymentError) {
               console.error('Payment processing error:', paymentError)
-              alert(`Payment failed: ${paymentError.message}`)
+              const errorMessage = paymentError.message || 'Unknown payment error'
+              alert(`Payment failed: ${errorMessage}`)
             }
           },
           (error) => {
@@ -290,19 +326,38 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
       const script = document.createElement('script')
       script.src = 'https://checkout.razorpay.com/v1/checkout.js'
       script.onload = () => {
-        const razorpayKey = getRazorpayKey()
-        
+        let razorpayKey = getRazorpayKey()
+
+        // Debug logging
+        console.log('🔑 Razorpay Key:', razorpayKey ? razorpayKey.substring(0, 10) + '...' : 'NOT SET')
+        console.log('🌐 Environment:', import.meta.env.MODE)
+        console.log('🏠 Hostname:', window.location.hostname)
+
         // More robust key validation - check if it's a real Razorpay key
-        const isValidRazorpayKey = razorpayKey && 
-                                  razorpayKey.startsWith('rzp_') && 
+        const isValidRazorpayKey = razorpayKey &&
+                                  razorpayKey.startsWith('rzp_') &&
                                   razorpayKey !== 'rzp_test_1234567890' &&
                                   razorpayKey.length > 20
-        
+
         if (!isValidRazorpayKey) {
           console.error('⚠️ Razorpay key validation failed')
-          alert('⚠️ Razorpay configuration error. Please check your API keys.')
-          setIsProcessing(false)
-          return
+          console.error('Key details:', {
+            exists: !!razorpayKey,
+            startsWithRzp: razorpayKey?.startsWith('rzp_'),
+            isTestKey: razorpayKey === 'rzp_test_1234567890',
+            length: razorpayKey?.length
+          })
+
+          // Try fallback test key for development
+          const fallbackKey = 'rzp_test_your_test_key_here' // Replace with actual test key
+          if (fallbackKey !== 'rzp_test_your_test_key_here') {
+            console.log('🔄 Using fallback test key')
+            razorpayKey = fallbackKey
+          } else {
+            alert(`⚠️ Razorpay configuration error. Please check your API keys.\n\nDebug Info:\n- Key: ${razorpayKey ? 'Set' : 'NOT SET'}\n- Environment: ${import.meta.env.MODE}`)
+            setIsProcessing(false)
+            return
+          }
         }
 
         let options
@@ -350,13 +405,42 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
                     orderNumber: `FS${Date.now()}`
                   }
                   
-                  // Store order in token context for later access
-                  setNewOrder(completedOrderData)
+                  // Add tokens to each shop that has items in the order
+                  const shopTokens = {}
+                  completedOrderData.items.forEach(item => {
+                    if (!shopTokens[item.shopId]) {
+                      shopTokens[item.shopId] = {
+                        shopName: item.shopName,
+                        shopId: item.shopId,
+                        items: [],
+                        totalAmount: 0
+                      }
+                    }
+                    shopTokens[item.shopId].items.push(item)
+                    shopTokens[item.shopId].totalAmount += item.price * item.quantity
+                  })
+
+                  // Add token to each shop
+                  Object.values(shopTokens).forEach(shopData => {
+                    const shopTokenData = {
+                      tokenNumber: completedOrderData.tokenNumber,
+                      shopName: shopData.shopName,
+                      shopId: shopData.shopId,
+                      items: shopData.items,
+                      totalAmount: shopData.totalAmount,
+                      orderStatus: 'confirmed',
+                      customerInfo: completedOrderData.customerInfo,
+                      firestoreOrderId: completedOrderData.firestoreOrderId,
+                      timestamp: new Date().toISOString()
+                    }
+                    addShopToken(shopData.shopId, shopTokenData)
+                  })
+
                   setCompletedOrder(completedOrderData)
                   // Clear cart and show payment success
                   clearCart() // Clear cart immediately after successful payment
                   onOrderSuccess(completedOrderData)
-                  
+
                   // Show payment success dialog
                   setShowPaymentSuccess(true)
                 } else {

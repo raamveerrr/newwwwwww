@@ -62,23 +62,29 @@ export function TokenProvider({ children }) {
 
   const hasActiveOrder = latestOrder !== null
 
-  // Shop-specific token functions
+  // Shop-specific token functions (now handle arrays of tokens)
   const getShopToken = (shopId) => {
-    return shopTokens[shopId] || null
+    return shopTokens[shopId] || []
   }
 
   const setShopToken = (shopId, tokenData) => {
-    const tokenWithTimestamp = {
-      ...tokenData,
-      timestamp: new Date().toISOString(),
+    // tokenData can be a single token or an array of tokens
+    const tokensArray = Array.isArray(tokenData) ? tokenData : [tokenData]
+
+    // Add timestamp to each token if not present
+    const tokensWithTimestamp = tokensArray.map(token => ({
+      ...token,
+      timestamp: token.timestamp || new Date().toISOString(),
       shopId
-    }
+    }))
+
     setShopTokens(prev => ({
       ...prev,
-      [shopId]: tokenWithTimestamp
+      [shopId]: tokensWithTimestamp
     }))
+
     // Save to localStorage
-    const allTokens = { ...shopTokens, [shopId]: tokenWithTimestamp }
+    const allTokens = { ...shopTokens, [shopId]: tokensWithTimestamp }
     localStorage.setItem('foodstreet_shop_tokens', JSON.stringify(allTokens))
   }
 
@@ -92,7 +98,18 @@ export function TokenProvider({ children }) {
   }
 
   const hasShopToken = (shopId) => {
-    return shopTokens[shopId] !== undefined
+    return (shopTokens[shopId] && shopTokens[shopId].length > 0) || false
+  }
+
+  const addShopToken = (shopId, tokenData) => {
+    const existingTokens = getShopToken(shopId)
+    const newToken = {
+      ...tokenData,
+      timestamp: new Date().toISOString(),
+      shopId
+    }
+    const updatedTokens = [...existingTokens, newToken]
+    setShopToken(shopId, updatedTokens)
   }
 
   const value = {

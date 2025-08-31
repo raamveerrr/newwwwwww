@@ -90,21 +90,18 @@ function MobileNavigation() {
   return (
     <nav className="mobile-nav">
       <div className="mobile-nav-container">
-        {navItems.filter(item => !item.hidden).map((item, index) => {
+        {navItems.filter(item => !item.hidden && item.label !== 'Token').map((item, index) => {
           if (item.onClick) {
             return (
               <button
                 key={index}
-                className={`mobile-nav-item ${item.active ? 'active' : ''} ${item.label === 'Token' ? 'token-nav-item' : ''}`}
+                className={`mobile-nav-item ${item.active ? 'active' : ''}`}
                 onClick={item.onClick}
               >
                 <div className="nav-icon-container">
                   <span className="nav-icon">{item.icon}</span>
                   {item.badge > 0 && (
                     <span className="nav-badge">{item.badge}</span>
-                  )}
-                  {item.label === 'Token' && (
-                    <span className="token-nav-indicator">!</span>
                   )}
                 </div>
                 <span className="nav-label">{item.label}</span>

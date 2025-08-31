@@ -5,7 +5,7 @@ export const razorpayConfig = {
   currency: 'INR',
   name: 'Digital Food Street',
   description: 'College Food Street Pre-Order',
-  image: 'https://via.placeholder.com/200x200/667eea/ffffff?text=FS', // Placeholder logo
+  image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjNjY3ZWVhIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zNWVtIj5GUzwvdGV4dD4KPC9zdmc+', // Base64 encoded SVG logo
   theme: {
     color: '#667eea'
   },
@@ -110,13 +110,37 @@ export const mockPayment = (amount, onSuccess, onError) => {
 // Mock payment verification (in production, this should be done on backend)
 export const verifyPayment = async (paymentData) => {
   // In production, send this data to your backend for verification
-  // For demo purposes, we'll simulate verification
-  
+  // For demo purposes, we'll simulate verification with proper validation
+
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 1000))
-  
-  // For demo, always return success
+
+  // Validate required payment data
+  if (!paymentData || !paymentData.razorpay_payment_id || !paymentData.razorpay_order_id || !paymentData.razorpay_signature) {
+    console.error('❌ Payment verification failed: Missing required payment data')
+    return {
+      success: false,
+      error: 'Missing payment data',
+      orderId: paymentData?.razorpay_order_id,
+      paymentId: paymentData?.razorpay_payment_id
+    }
+  }
+
+  // Simulate random verification failures for testing (10% chance)
+  const shouldFail = Math.random() < 0.1 // 10% chance of failure
+  if (shouldFail) {
+    console.warn('⚠️ Payment verification failed: Simulated verification error')
+    return {
+      success: false,
+      error: 'Payment verification failed',
+      orderId: paymentData.razorpay_order_id,
+      paymentId: paymentData.razorpay_payment_id
+    }
+  }
+
+  // For demo, return success with proper validation
   // In production, verify the payment signature on backend
+  console.log('✅ Payment verification successful')
   return {
     success: true,
     orderId: paymentData.razorpay_order_id,

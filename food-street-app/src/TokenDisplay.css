@@ -1,4 +1,4 @@
-/* Token Display Styles */
+/* Token Display Styles - Mobile First */
 .token-overlay {
   position: fixed;
   top: 0;
@@ -10,20 +10,34 @@
   justify-content: center;
   align-items: center;
   z-index: 10000;
-  padding: 20px;
+  padding: 10px;
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
 }
 
 .token-container {
   background: white;
-  border-radius: 20px;
-  max-width: 500px;
-  width: 100%;
-  max-height: 90vh;
+  border-radius: 16px;
+  max-width: 400px;
+  width: 95%;
+  max-height: 95vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: tokenSlideUp 0.4s ease-out;
+}
+
+/* Desktop adjustments */
+@media (min-width: 768px) {
+  .token-overlay {
+    padding: 20px;
+  }
+
+  .token-container {
+    border-radius: 20px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+  }
 }
 
 @keyframes tokenSlideUp {
@@ -433,6 +447,168 @@
   color: #333;
 }
 
+/* Tokens List Styles */
+.tokens-list {
+  padding: 20px;
+}
+
+.tokens-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.tokens-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.3rem;
+}
+
+.generate-token-btn {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.generate-token-btn:hover {
+  background: #5a67d8;
+  transform: translateY(-2px);
+}
+
+.generate-token-btn.small {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+.tokens-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.token-card {
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.token-card:hover {
+  background: #e9ecef;
+  border-color: #667eea;
+  transform: translateY(-2px);
+}
+
+.token-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.token-number-small {
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  color: #333;
+  letter-spacing: 1px;
+}
+
+.status-small {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-confirmed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-preparing {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-ready {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.status-completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.token-card-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.token-date {
+  font-weight: 500;
+}
+
+.token-time {
+  font-weight: 600;
+  color: #333;
+}
+
+/* No Tokens State */
+.no-tokens {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.no-tokens-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  opacity: 0.6;
+}
+
+.no-tokens h3 {
+  margin: 0 0 10px;
+  color: #666;
+  font-size: 1.4rem;
+}
+
+.no-tokens p {
+  margin: 0 0 30px;
+  color: #888;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Back Button */
+.back-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.back-btn:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .token-overlay {
@@ -470,7 +646,8 @@
 
   .pickup-info,
   .pickup-instructions,
-  .order-summary-token {
+  .order-summary-token,
+  .tokens-list {
     padding: 15px;
   }
 
@@ -487,6 +664,18 @@
 
   .token-actions button {
     min-width: auto;
+  }
+
+  .tokens-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .token-card-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
   }
 }
 
@@ -510,5 +699,17 @@
     width: 25px;
     height: 25px;
     font-size: 0.8rem;
+  }
+
+  .token-number-small {
+    font-size: 1rem;
+  }
+
+  .no-tokens-icon {
+    font-size: 3rem;
+  }
+
+  .no-tokens h3 {
+    font-size: 1.2rem;
   }
 }
