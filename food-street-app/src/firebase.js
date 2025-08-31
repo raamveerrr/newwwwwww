@@ -37,4 +37,11 @@ googleProvider.setCustomParameters({
 googleProvider.addScope('email')
 googleProvider.addScope('profile')
 
+// Debug logging for Firebase configuration
+if (import.meta.env.DEV) {
+  console.log('🔥 Firebase initialized successfully')
+  console.log('🔐 Auth domain:', firebaseConfig.authDomain)
+  console.log('📊 Project ID:', firebaseConfig.projectId)
+}
+
 export default app

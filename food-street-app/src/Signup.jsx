@@ -59,7 +59,6 @@ function Signup({ onSwitchToLogin, onClose }) {
   return (
     <div className="auth-overlay" onClick={onClose}>
       <div 
-        ref={swipeRef}
         className="auth-modal"
         onClick={e => {
           e.stopPropagation()

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Food Ordering App - Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(45deg, #00d4aa, #00b894);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            margin: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .emoji {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍕 Simple Food Ordering App</h1>
+        <p>A mobile-responsive React web app for students to pre-order food and skip the queue!</p>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="emoji">🏠</div>
+                <h3>Home Page</h3>
+                <p>Welcome message with "Order Now" button</p>
+            </div>
+            <div class="feature">
+                <div class="emoji">📱</div>
+                <h3>Menu Page</h3>
+                <p>Browse food items with category filters and add to cart</p>
+            </div>
+            <div class="feature">
+                <div class="emoji">🛒</div>
+                <h3>Cart Page</h3>
+                <p>Review selected items, adjust quantities, see total</p>
+            </div>
+            <div class="feature">
+                <div class="emoji">💳</div>
+                <h3>Payment Page</h3>
+                <p>Mock payment with multiple payment methods</p>
+            </div>
+            <div class="feature">
+                <div class="emoji">✅</div>
+                <h3>Success Page</h3>
+                <p>Payment confirmation with unique order token</p>
+            </div>
+            <div class="feature">
+                <div class="emoji">📱</div>
+                <h3>Mobile Responsive</h3>
+                <p>Fully optimized for mobile devices using Flexbox/Grid</p>
+            </div>
+        </div>
+
+        <h2>🚀 Key Features Implemented:</h2>
+        <ul style="line-height: 1.8;">
+            <li><strong>React with Vite:</strong> Modern, fast development setup</li>
+            <li><strong>React Router:</strong> Smooth navigation between pages</li>
+            <li><strong>Context API:</strong> Cart and order state management</li>
+            <li><strong>Mobile-First Design:</strong> Responsive CSS with Flexbox/Grid</li>
+            <li><strong>Mock Payment:</strong> Simulated payment flow with token generation</li>
+            <li><strong>Clean UI:</strong> Beautiful gradients and glass morphism effects</li>
+            <li><strong>Static Data:</strong> No backend required - all data is static</li>
+            <li><strong>Accessibility:</strong> Proper focus states and responsive design</li>
+        </ul>
+
+        <h2>📁 File Structure:</h2>
+        <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 8px; font-family: monospace; margin: 1rem 0;">
+src/<br>
+├── SimpleApp.jsx          (Main app with routing)<br>
+├── SimpleHome.jsx         (Home page component)<br>
+├── SimpleMenu.jsx         (Menu page with food items)<br>
+├── SimpleCart.jsx         (Cart page with item management)<br>
+├── SimplePayment.jsx      (Mock payment page)<br>
+├── SimpleSuccess.jsx      (Success page with token)<br>
+├── SimpleCartContext.jsx  (Cart state management)<br>
+├── SimpleOrderContext.jsx (Order state management)<br>
+└── CSS files for styling
+        </div>
+
+        <h2>🎯 How to Use:</h2>
+        <ol style="line-height: 1.8;">
+            <li>Start from the Home page with welcome message</li>
+            <li>Click "Order Now" to browse the menu</li>
+            <li>Add items to cart using category filters</li>
+            <li>Review cart and proceed to payment</li>
+            <li>Simulate payment success</li>
+            <li>Get your unique order token on success page</li>
+        </ol>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="#" class="btn">🚀 Ready to Run!</a>
+            <p style="margin-top: 1rem; opacity: 0.8;">
+                Run <code style="background: rgba(0,0,0,0.3); padding: 0.25rem 0.5rem; border-radius: 4px;">npm run dev</code> to start the development server
+            </p>
+        </div>
+    </div>
+</body>
+</html>
