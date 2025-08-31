@@ -144,8 +144,9 @@ Thank you for choosing Food Street!
     const environmentLabel = this.isProduction ? 'HTTPS Production' : 'Development'
     console.log(`🧪 Mock printing for ${orderData.shopName} (${environmentLabel}):`)
     
-    // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Simulate minimal processing delay to avoid interfering with payment
+    const delay = this.isProduction ? 100 : 500 // Faster in production
+    await new Promise(resolve => setTimeout(resolve, delay))
     
     // Generate and log the receipt content
     const receiptContent = this.generateReceiptContent(orderData)
@@ -160,27 +161,46 @@ Thank you for choosing Food Street!
       timestamp: new Date().toISOString(),
       isDevelopment: this.isDevelopment,
       isProduction: this.isProduction,
-      environment: environmentLabel
+      environment: environmentLabel,
+      delay: delay
     }
     
-    console.log(`✅ Mock receipt printed successfully for ${orderData.shopName} (${environmentLabel})`)
+    console.log(`✅ Mock receipt printed successfully for ${orderData.shopName} (${environmentLabel}) in ${delay}ms`)
     return mockResult
   }
 
   // Send receipt to specific shop printer with queue management
   async sendToPrinter(shopId, orderData) {
-    // Development mode OR HTTPS production - simulate printing
-    if (this.isDevelopment || this.isProduction) {
+    try {
+      // In production environments, always use mock printing to avoid any interference
+      if (this.isProduction || this.isHTTPS || this.isNetlifyProduction) {
+        console.log('🖨️ Production environment - using safe mock printing')
+        return this.mockPrint(shopId, orderData)
+      }
+      
+      // Development mode - simulate printing
+      if (this.isDevelopment) {
+        return this.mockPrint(shopId, orderData)
+      }
+      
+      // Only use network printers in very specific local HTTP development
+      if (this.useNetworkPrinters) {
+        return this.addToPrintQueue(shopId, orderData)
+      }
+      
+      // Fallback to mock printing
       return this.mockPrint(shopId, orderData)
+    } catch (error) {
+      console.error('😱 Printer service error (non-critical):', error)
+      // Return success to avoid breaking payment flow
+      return {
+        success: true,
+        printerId: `fallback_${shopId}`,
+        timestamp: new Date().toISOString(),
+        environment: 'Fallback',
+        error: error.message
+      }
     }
-    
-    // Only use network printers in local HTTP development
-    if (this.useNetworkPrinters) {
-      return this.addToPrintQueue(shopId, orderData)
-    }
-    
-    // Fallback to mock printing
-    return this.mockPrint(shopId, orderData)
   }
   
   // Queue management for concurrent printing

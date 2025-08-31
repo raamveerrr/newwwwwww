@@ -68,8 +68,21 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
       
       console.log('✅ Order saved successfully with ID:', docRef.id)
       
-      // Trigger automatic receipt printing for each shop
-      await triggerAutomaticReceipts(cleanOrderData)
+      // Option to completely disable printer integration if it causes issues
+      const isProduction = window.location.hostname.includes('netlify.app') || 
+                          window.location.hostname.includes('digitalfoodstreet')
+      const ENABLE_PRINTER_INTEGRATION = !isProduction // Disable in production for now
+      
+      if (ENABLE_PRINTER_INTEGRATION) {
+        // Trigger automatic receipt printing for each shop (non-blocking)
+        // Don't await this - let it run in background to avoid interfering with payment flow
+        triggerAutomaticReceipts(cleanOrderData).catch(error => {
+          console.warn('⚠️ Background receipt printing failed:', error)
+          // Don't throw - payment was successful, printing is optional
+        })
+      } else {
+        console.log('🖨️ Printer integration disabled in production mode')
+      }
       
       return docRef.id
     } catch (error) {
@@ -85,69 +98,96 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
   }
 
   const triggerAutomaticReceipts = async (orderData) => {
-    try {
-      console.log('🖨️ Starting automatic receipt printing process...')
-      
-      // Group items by shop for separate receipts
-      const shopOrders = {}
-      orderData.items.forEach(item => {
-        if (!shopOrders[item.shopId]) {
-          shopOrders[item.shopId] = {
-            shopName: item.shopName,
-            items: [],
-            shopTotal: 0
+    // Wrap in timeout to ensure this never blocks payment processing
+    const printingPromise = new Promise(async (resolve) => {
+      try {
+        console.log('🖨️ Starting automatic receipt printing process...')
+        
+        // Group items by shop for separate receipts
+        const shopOrders = {}
+        orderData.items.forEach(item => {
+          if (!shopOrders[item.shopId]) {
+            shopOrders[item.shopId] = {
+              shopName: item.shopName,
+              items: [],
+              shopTotal: 0
+            }
           }
-        }
-        shopOrders[item.shopId].items.push(item)
-        shopOrders[item.shopId].shopTotal += item.price * item.quantity
-      })
+          shopOrders[item.shopId].items.push(item)
+          shopOrders[item.shopId].shopTotal += item.price * item.quantity
+        })
 
-      // Send receipt to each shop's printer automatically
-      const printResults = []
-      for (const [shopId, shopOrder] of Object.entries(shopOrders)) {
-        const shopOrderData = {
-          ...orderData,
-          shopId,
-          shopName: shopOrder.shopName,
-          items: shopOrder.items,
-          shopTotal: shopOrder.shopTotal
+        // Send receipt to each shop's printer automatically (with individual timeouts)
+        const printResults = []
+        const printPromises = Object.entries(shopOrders).map(async ([shopId, shopOrder]) => {
+          try {
+            const shopOrderData = {
+              ...orderData,
+              shopId,
+              shopName: shopOrder.shopName,
+              items: shopOrder.items,
+              shopTotal: shopOrder.shopTotal
+            }
+            
+            // Individual timeout for each print job (3 seconds max)
+            const printResult = await Promise.race([
+              printerService.sendToPrinter(shopId, shopOrderData),
+              new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Print timeout')), 3000)
+              )
+            ])
+            
+            printResults.push({ shopId, shopName: shopOrder.shopName, ...printResult })
+            
+            if (printResult.success) {
+              console.log(`✅ Print successful for ${shopOrder.shopName}`)
+            } else {
+              console.warn(`⚠️ Print failed for ${shopOrder.shopName}:`, printResult.error)
+            }
+          } catch (error) {
+            console.warn(`⚠️ Print failed for ${shopOrder.shopName}:`, error.message)
+            printResults.push({ shopId, shopName: shopOrder.shopName, success: false, error: error.message })
+          }
+        })
+        
+        // Wait for all print jobs with overall timeout
+        await Promise.allSettled(printPromises)
+        
+        // Show user notification about receipt printing (non-blocking)
+        const successfulPrints = printResults.filter(r => r.success)
+        const failedPrints = printResults.filter(r => !r.success)
+        
+        if (successfulPrints.length > 0) {
+          const shopNames = successfulPrints.map(p => p.shopName).join(', ')
+          const isDev = successfulPrints.some(p => p.isDevelopment)
+          
+          setTimeout(() => {
+            alert(`✅ Receipt ${isDev ? 'simulated' : 'printed'} at: ${shopNames}\n\n🎫 Your Token: ${orderData.tokenNumber}\n\n📍 Please visit the shop(s) to collect your order!`)
+          }, 1500)
         }
         
-        // Send to printer service
-        const printResult = await printerService.sendToPrinter(shopId, shopOrderData)
-        printResults.push({ shopId, shopName: shopOrder.shopName, ...printResult })
-        
-        if (printResult.success) {
-          console.log(`✅ Print successful for ${shopOrder.shopName}`)
-        } else {
-          console.warn(`⚠️ Print failed for ${shopOrder.shopName}:`, printResult.error)
+        if (failedPrints.length > 0) {
+          const failedShops = failedPrints.map(p => p.shopName).join(', ')
+          console.warn(`⚠️ Print failed for: ${failedShops} - shop owners will be notified`)
         }
+        
+        resolve(printResults)
+      } catch (error) {
+        console.error('Error in automatic receipt printing:', error)
+        resolve([]) // Always resolve, never reject
       }
-      
-      // Show user notification about receipt printing
-      const successfulPrints = printResults.filter(r => r.success)
-      const failedPrints = printResults.filter(r => !r.success)
-      
-      if (successfulPrints.length > 0) {
-        const shopNames = successfulPrints.map(p => p.shopName).join(', ')
-        const isDev = successfulPrints.some(p => p.isDevelopment)
-        
+    })
+    
+    // Overall timeout for entire printing process (10 seconds max)
+    return Promise.race([
+      printingPromise,
+      new Promise(resolve => 
         setTimeout(() => {
-          alert(`✅ Receipt ${isDev ? 'simulated' : 'printed'} at: ${shopNames}\n\n🎫 Your Token: ${orderData.tokenNumber}\n\n📍 Please visit the shop(s) to collect your order!`)
-        }, 1500)
-      }
-      
-      if (failedPrints.length > 0) {
-        const failedShops = failedPrints.map(p => p.shopName).join(', ')
-        console.warn(`⚠️ Print failed for: ${failedShops} - shop owners will be notified`)
-      }
-      
-      return printResults
-    } catch (error) {
-      console.error('Error in automatic receipt printing:', error)
-      // Don't throw error - payment was successful, printing is secondary
-      return []
-    }
+          console.warn('⚠️ Receipt printing timed out - continuing with payment success')
+          resolve([])
+        }, 10000)
+      )
+    ])
   }
 
 
