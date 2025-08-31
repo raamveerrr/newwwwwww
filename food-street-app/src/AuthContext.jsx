@@ -4,7 +4,9 @@ import {
   signInWithRedirect,
   getRedirectResult,
   signOut, 
-  onAuthStateChanged
+  onAuthStateChanged,
+  signInWithPhoneNumber,
+  RecaptchaVerifier
 } from 'firebase/auth'
 import { doc, setDoc, getDoc } from 'firebase/firestore'
 import { auth, db, googleProvider } from './firebase'
@@ -121,11 +123,88 @@ export function AuthProvider({ children }) {
 
 
 
+  // Phone authentication functions
+  async function signInWithPhoneNumber(phoneNumber) {
+    try {
+      // Initialize reCAPTCHA verifier
+      if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible',
+          'callback': (response) => {
+            console.log('reCAPTCHA solved')
+          },
+          'expired-callback': () => {
+            console.log('reCAPTCHA expired')
+          }
+        })
+      }
+      
+      const appVerifier = window.recaptchaVerifier
+      const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+      return confirmationResult
+    } catch (error) {
+      console.error('Phone sign-in error:', error)
+      throw error
+    }
+  }
+
+  async function verifyOtp(confirmationResult, otp, userData = {}) {
+    try {
+      const result = await confirmationResult.confirm(otp)
+      const user = result.user
+      
+      // Check if user profile already exists
+      const userDocRef = doc(db, 'users', user.uid)
+      const userDoc = await getDoc(userDocRef)
+      
+      let profileData
+      
+      if (!userDoc.exists()) {
+        // Create new user profile
+        profileData = {
+          uid: user.uid,
+          name: userData.name || user.displayName || 'User',
+          email: user.email || '',
+          phone: user.phoneNumber,
+          userType: userData.userType || 'student',
+          shopId: userData.shopId || null,
+          createdAt: new Date().toISOString(),
+          authProvider: 'phone',
+          photoURL: user.photoURL
+        }
+        
+        await setDoc(userDocRef, profileData)
+        console.log('👤 New user profile created via phone')
+      } else {
+        // Update existing profile
+        profileData = userDoc.data()
+        if (userData.userType && profileData.userType !== userData.userType) {
+          profileData.userType = userData.userType
+          profileData.shopId = userData.shopId || profileData.shopId
+          await setDoc(userDocRef, profileData, { merge: true })
+          console.log('👤 User profile updated')
+        }
+      }
+      
+      setUserProfile(profileData)
+      console.log('✅ Phone authentication completed successfully')
+      return result
+    } catch (error) {
+      console.error('❌ OTP verification error:', error)
+      throw error
+    }
+  }
+
   // Logout function
   async function logout() {
     try {
       await signOut(auth)
       setUserProfile(null)
+      // Clean up reCAPTCHA verifier
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear()
+        window.recaptchaVerifier = null
+      }
     } catch (error) {
       console.error('Logout error:', error)
       throw error
@@ -224,6 +303,8 @@ export function AuthProvider({ children }) {
     currentUser,
     userProfile,
     signInWithGoogle,
+    signInWithPhoneNumber,
+    verifyOtp,
     logout,
     validateEmail,
     validateCollegeEmail

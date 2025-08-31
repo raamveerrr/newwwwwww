@@ -213,7 +213,7 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
           getTotalPrice(),
           async (response) => {
             try {
-              console.log('📝 Mock payment response received:', response)
+              console.log('📝 Mock payment response received')
               
               // Validate response
               if (!response || !response.razorpay_payment_id) {
@@ -241,7 +241,7 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
                   mockPayment: true // Flag for development
                 }
 
-                console.log('📝 Creating order with data:', orderData)
+                console.log('📝 Creating order...')
                 const firestoreOrderId = await createOrderInFirestore(orderData)
                 
                 const completedOrderData = {
@@ -292,12 +292,6 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
       script.onload = () => {
         const razorpayKey = getRazorpayKey()
         
-        console.log('💳 Payment Key Validation:', {
-          key: razorpayKey,
-          isValid: !!(razorpayKey && razorpayKey !== 'rzp_test_1234567890'),
-          keyFormat: razorpayKey?.startsWith('rzp_') ? 'Valid Format' : 'Invalid Format'
-        })
-        
         // More robust key validation - check if it's a real Razorpay key
         const isValidRazorpayKey = razorpayKey && 
                                   razorpayKey.startsWith('rzp_') && 
@@ -305,13 +299,7 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
                                   razorpayKey.length > 20
         
         if (!isValidRazorpayKey) {
-          console.error('😱 Razorpay key validation failed:', {
-            keyPresent: !!razorpayKey,
-            keyValue: razorpayKey,
-            envVars: {
-              VITE_RAZORPAY_KEY_ID: import.meta.env.VITE_RAZORPAY_KEY_ID
-            }
-          })
+          console.error('⚠️ Razorpay key validation failed')
           alert('⚠️ Razorpay configuration error. Please check your API keys.')
           setIsProcessing(false)
           return
@@ -321,64 +309,67 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
         try {
           options = {
             key: razorpayKey,
-          amount: getTotalPrice() * 100, // Amount in paise
-          currency: razorpayConfig.currency,
-          name: razorpayConfig.name,
-          description: `Order for ${cartItems.length} items`,
-          image: razorpayConfig.image,
-          handler: async function (response) {
-            try {
-              // Verify payment (in production, do this on backend)
-              const verification = await verifyPayment(response)
-              
-              if (verification.success) {
-                // Generate unique token number
-                const tokenNumber = generateTokenNumber()
+            amount: getTotalPrice() * 100, // Amount in paise
+            currency: razorpayConfig.currency,
+            name: razorpayConfig.name,
+            description: `Order for ${cartItems.length} items`,
+            image: razorpayConfig.image,
+            // Enhanced payment method configuration with UPI priority
+            method: razorpayConfig.method,
+            config: razorpayConfig.config,
+            handler: async function (response) {
+              try {
+                // Verify payment (in production, do this on backend)
+                const verification = await verifyPayment(response)
                 
-                // Create order in Firestore
-                const orderData = {
-                  userId: currentUser.uid,
-                  customerInfo,
-                  items: cartItems,
-                  totalAmount: getTotalPrice(),
-                  paymentId: response.razorpay_payment_id,
-                  orderId: response.razorpay_order_id,
-                  signature: response.razorpay_signature,
-                  tokenNumber: tokenNumber,
-                  status: 'paid',
-                  orderStatus: 'confirmed',
-                  orderType: 'pickup'
-                }
+                if (verification.success) {
+                  // Generate unique token number
+                  const tokenNumber = generateTokenNumber()
+                  
+                  // Create order in Firestore
+                  const orderData = {
+                    userId: currentUser.uid,
+                    customerInfo,
+                    items: cartItems,
+                    totalAmount: getTotalPrice(),
+                    paymentId: response.razorpay_payment_id,
+                    orderId: response.razorpay_order_id,
+                    signature: response.razorpay_signature,
+                    tokenNumber: tokenNumber,
+                    status: 'paid',
+                    orderStatus: 'confirmed',
+                    orderType: 'pickup'
+                  }
 
-                const firestoreOrderId = await createOrderInFirestore(orderData)
-                
-                // Set completed order data for token display
-                const completedOrderData = {
-                  ...orderData,
-                  firestoreOrderId,
-                  orderNumber: `FS${Date.now()}`
+                  const firestoreOrderId = await createOrderInFirestore(orderData)
+                  
+                  // Set completed order data for token display
+                  const completedOrderData = {
+                    ...orderData,
+                    firestoreOrderId,
+                    orderNumber: `FS${Date.now()}`
+                  }
+                  
+                  // Store order in token context for later access
+                  setNewOrder(completedOrderData)
+                  setCompletedOrder(completedOrderData)
+                  
+                  // Clear cart and show payment success
+                  clearCart()
+                  onOrderSuccess(completedOrderData)
+                  
+                  // Show payment success dialog
+                  setShowPaymentSuccess(true)
+                } else {
+                  alert('Payment verification failed. Please contact support.')
                 }
-                
-                // Store order in token context for later access
-                setNewOrder(completedOrderData)
-                setCompletedOrder(completedOrderData)
-                
-                // Clear cart and show payment success
-                clearCart()
-                onOrderSuccess(completedOrderData)
-                
-                // Show payment success dialog
-                setShowPaymentSuccess(true)
-              } else {
+              } catch (error) {
+                console.error('Payment verification error:', error)
                 alert('Payment verification failed. Please contact support.')
+              } finally {
+                setIsProcessing(false)
               }
-            } catch (error) {
-              console.error('Payment verification error:', error)
-              alert('Payment verification failed. Please contact support.')
-            } finally {
-              setIsProcessing(false)
-            }
-          },
+            },
           prefill: {
             name: customerInfo.name,
             email: customerInfo.email,

@@ -7,7 +7,12 @@ function Login({ onSwitchToSignup, onClose }) {
   const [selectedShop, setSelectedShop] = useState('') // For admin users
   const [error, setError] = useState('')
   const [googleLoading, setGoogleLoading] = useState(false)
-  const { signInWithGoogle } = useAuth()
+  const [phoneLoading, setPhoneLoading] = useState(false)
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [otp, setOtp] = useState('')
+  const [showOtpInput, setShowOtpInput] = useState(false)
+  const [confirmationResult, setConfirmationResult] = useState(null)
+  const { signInWithGoogle, signInWithPhoneNumber, verifyOtp } = useAuth()
 
   // Prevent background scrolling when modal is open
   useEffect(() => {
@@ -65,6 +70,61 @@ function Login({ onSwitchToSignup, onClose }) {
       }
     } finally {
       setGoogleLoading(false)
+    }
+  }
+
+  async function handlePhoneLogin() {
+    if (!userType) {
+      return setError('Please select user type (Student or Admin) before continuing')
+    }
+
+    if (userType === 'admin' && !selectedShop) {
+      return setError('Please select your shop before continuing')
+    }
+
+    if (!phoneNumber || phoneNumber.length < 10) {
+      return setError('Please enter a valid 10-digit mobile number')
+    }
+
+    try {
+      setError('')
+      setPhoneLoading(true)
+      
+      const fullPhoneNumber = `+91${phoneNumber}`
+      console.log('📱 Starting phone authentication...')
+      
+      const result = await signInWithPhoneNumber(fullPhoneNumber)
+      setConfirmationResult(result)
+      setShowOtpInput(true)
+      setPhoneLoading(false)
+    } catch (error) {
+      console.error('❌ Phone authentication failed:', error)
+      setError('Failed to send OTP: ' + (error.message || 'Unknown error occurred'))
+      setPhoneLoading(false)
+    }
+  }
+
+  async function handleOtpVerification() {
+    if (!otp || otp.length !== 6) {
+      return setError('Please enter a valid 6-digit OTP')
+    }
+
+    try {
+      setError('')
+      setPhoneLoading(true)
+      
+      const userData = {
+        userType,
+        shopId: userType === 'admin' ? selectedShop : null
+      }
+      
+      await verifyOtp(confirmationResult, otp, userData)
+      onClose()
+    } catch (error) {
+      console.error('❌ OTP verification failed:', error)
+      setError('Invalid OTP. Please try again.')
+    } finally {
+      setPhoneLoading(false)
     }
   }
 
@@ -134,6 +194,82 @@ function Login({ onSwitchToSignup, onClose }) {
             {googleLoading ? 'Signing in...' : 'Continue with Google'}
           </button>
           
+          <div className="auth-divider">
+            <span>OR</span>
+          </div>
+          
+          {!showOtpInput ? (
+            <>
+              <div className="form-group">
+                <label>Mobile Number:</label>
+                <div className="phone-input-group">
+                  <span className="country-code">+91</span>
+                  <input
+                    type="tel"
+                    placeholder="Enter 10-digit mobile number"
+                    value={phoneNumber}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '').slice(0, 10)
+                      setPhoneNumber(value)
+                    }}
+                    className="phone-input"
+                    maxLength="10"
+                  />
+                </div>
+              </div>
+              
+              <button 
+                type="button" 
+                className="phone-auth-button secondary" 
+                onClick={handlePhoneLogin}
+                disabled={phoneLoading || !userType || !phoneNumber || phoneNumber.length < 10 || (userType === 'admin' && !selectedShop)}
+              >
+                <span className="phone-icon">📱</span>
+                {phoneLoading ? 'Sending OTP...' : 'Continue with Mobile'}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="form-group">
+                <label>Enter OTP sent to +91{phoneNumber}:</label>
+                <input
+                  type="text"
+                  placeholder="Enter 6-digit OTP"
+                  value={otp}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 6)
+                    setOtp(value)
+                  }}
+                  className="otp-input"
+                  maxLength="6"
+                />
+              </div>
+              
+              <button 
+                type="button" 
+                className="phone-auth-button primary" 
+                onClick={handleOtpVerification}
+                disabled={phoneLoading || !otp || otp.length !== 6}
+              >
+                <span className="verify-icon">✓</span>
+                {phoneLoading ? 'Verifying...' : 'Verify OTP'}
+              </button>
+              
+              <button 
+                type="button" 
+                className="back-button"
+                onClick={() => {
+                  setShowOtpInput(false)
+                  setOtp('')
+                  setPhoneNumber('')
+                  setConfirmationResult(null)
+                }}
+              >
+                ← Back to phone number
+              </button>
+            </>
+          )}
+          
           <div className="auth-note">
             <p>🔒 Secure authentication powered by Google</p>
             <p>We only use Google accounts for enhanced security</p>
@@ -148,6 +284,9 @@ function Login({ onSwitchToSignup, onClose }) {
             </button>
           </p>
         </div>
+        
+        {/* reCAPTCHA container */}
+        <div id="recaptcha-container"></div>
       </div>
     </div>
   )

@@ -14,6 +14,40 @@ export const razorpayConfig = {
       console.log('Payment cancelled by user')
     }
   },
+  // Payment method preferences (UPI prioritized)
+  method: {
+    upi: true,
+    card: true,
+    netbanking: true,
+    wallet: true,
+    emi: false,
+    paylater: false
+  },
+  // UPI specific configuration
+  config: {
+    display: {
+      blocks: {
+        banks: {
+          name: 'Pay using ' + (window.navigator.userAgent.includes('Mobile') ? 'UPI Apps' : 'Net Banking'),
+          instruments: [
+            {
+              method: 'upi'
+            },
+            {
+              method: 'card'
+            },
+            {
+              method: 'netbanking'
+            }
+          ]
+        }
+      },
+      sequence: ['block.banks'],
+      preferences: {
+        show_default_blocks: true
+      }
+    }
+  },
   // Development mode flag
   isDevelopment: true
 }
@@ -21,13 +55,10 @@ export const razorpayConfig = {
 // For production, use environment variables
 export const getRazorpayKey = () => {
   const key = import.meta.env.VITE_RAZORPAY_KEY_ID || razorpayConfig.keyId
-  console.log('🔑 Razorpay Key Status:', {
-    envKey: import.meta.env.VITE_RAZORPAY_KEY_ID ? 'Present' : 'Missing',
-    fallbackKey: razorpayConfig.keyId,
-    finalKey: key ? `${key.substring(0, 12)}...` : 'No key found',
-    keyLength: key?.length || 0,
-    isValidFormat: key?.startsWith('rzp_') || false
-  })
+  // Only log in development, never expose key details in production
+  if (import.meta.env.DEV) {
+    console.log('🔑 Razorpay Key loaded successfully')
+  }
   return key
 }
 
@@ -47,14 +78,10 @@ export const isDevelopmentMode = () => {
   
   const isDev = isLocalhost || isDevEnvironment || (hasTestKey && !window.location.hostname.includes('netlify.app'))
   
-  console.log('🔍 Payment mode detection:', {
-    hostname: window.location.hostname,
-    isLocalhost,
-    isDevEnvironment,
-    hasTestKey,
-    isDev,
-    keyPresent: !!key
-  })
+  // Only log detailed info in development
+  if (import.meta.env.DEV) {
+    console.log('🔍 Payment mode: ' + (isDev ? 'Development' : 'Production'))
+  }
   
   return isDev
 }
@@ -73,7 +100,7 @@ export const mockPayment = (amount, onSuccess, onError) => {
         razorpay_signature: `mock_signature_${randomId}_${timestamp}`
       }
       
-      console.log('🧪 Mock payment completed:', mockResponse)
+      console.log('🧪 Mock payment completed')
       onSuccess(mockResponse)
       resolve(mockResponse)
     }, 2000) // 2 second delay to simulate processing
@@ -84,7 +111,6 @@ export const mockPayment = (amount, onSuccess, onError) => {
 export const verifyPayment = async (paymentData) => {
   // In production, send this data to your backend for verification
   // For demo purposes, we'll simulate verification
-  console.log('Payment verification data:', paymentData)
   
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 1000))
