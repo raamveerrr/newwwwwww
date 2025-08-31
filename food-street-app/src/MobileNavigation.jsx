@@ -43,21 +43,7 @@ function MobileNavigation() {
       label: 'Orders',
       active: location.pathname === '/orders'
     },
-    {
-      path: '#token',
-      icon: '🎫',
-      label: 'Token',
-      active: false,
-      hidden: !hasActiveOrder,
-      onClick: (e) => {
-        e.preventDefault()
-        openTokenDialog()
-        // Haptic feedback
-        if (navigator.vibrate) {
-          navigator.vibrate(25)
-        }
-      }
-    },
+
 
     {
       path: '#cart',

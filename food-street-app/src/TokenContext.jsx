@@ -12,6 +12,7 @@ export function useToken() {
 
 export function TokenProvider({ children }) {
   const [latestOrder, setLatestOrder] = useState(null)
+  const [shopTokens, setShopTokens] = useState({})
   const [showTokenDialog, setShowTokenDialog] = useState(false)
 
   // Load latest order from localStorage on mount
@@ -61,6 +62,39 @@ export function TokenProvider({ children }) {
 
   const hasActiveOrder = latestOrder !== null
 
+  // Shop-specific token functions
+  const getShopToken = (shopId) => {
+    return shopTokens[shopId] || null
+  }
+
+  const setShopToken = (shopId, tokenData) => {
+    const tokenWithTimestamp = {
+      ...tokenData,
+      timestamp: new Date().toISOString(),
+      shopId
+    }
+    setShopTokens(prev => ({
+      ...prev,
+      [shopId]: tokenWithTimestamp
+    }))
+    // Save to localStorage
+    const allTokens = { ...shopTokens, [shopId]: tokenWithTimestamp }
+    localStorage.setItem('foodstreet_shop_tokens', JSON.stringify(allTokens))
+  }
+
+  const clearShopToken = (shopId) => {
+    setShopTokens(prev => {
+      const newTokens = { ...prev }
+      delete newTokens[shopId]
+      localStorage.setItem('foodstreet_shop_tokens', JSON.stringify(newTokens))
+      return newTokens
+    })
+  }
+
+  const hasShopToken = (shopId) => {
+    return shopTokens[shopId] !== undefined
+  }
+
   const value = {
     latestOrder,
     setNewOrder,
@@ -68,7 +102,12 @@ export function TokenProvider({ children }) {
     showTokenDialog,
     openTokenDialog,
     closeTokenDialog,
-    hasActiveOrder
+    hasActiveOrder,
+    shopTokens,
+    getShopToken,
+    setShopToken,
+    clearShopToken,
+    hasShopToken
   }
 
   return (

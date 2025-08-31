@@ -15,6 +15,7 @@ import Orders from './Orders'
 import Admin from './Admin'
 import Cart from './Cart'
 import MobileNavigation from './MobileNavigation'
+import TokenDisplay from './TokenDisplay'
 import { usePullToRefresh } from './hooks/usePullToRefresh'
 // Policy Pages
 import PrivacyPolicy from './PrivacyPolicy'
@@ -121,7 +122,9 @@ const shops = [
 // Landing Page Component with Pull-to-Refresh
 function LandingPage() {
   const { currentUser, userProfile, logout } = useAuth()
+  const { hasActiveOrder, latestOrder, showTokenDialog, openTokenDialog, closeTokenDialog, getShopToken, setShopToken } = useToken()
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
+  const [selectedShopForToken, setSelectedShopForToken] = useState(null)
 
   // Pull-to-refresh functionality - only refreshes when at very top
   const handleRefresh = async () => {
@@ -153,9 +156,34 @@ function LandingPage() {
       3: '/menu/bites',
       4: '/menu/shakers'
     }
-    
+
     if (shopRoutes[shopId]) {
       window.location.href = shopRoutes[shopId]
+    }
+  }
+
+  const handleTokenClick = (shopId) => {
+    const shop = shops.find(s => s.id === shopId)
+    const existingToken = getShopToken(shopId)
+
+    if (existingToken) {
+      // Show existing token
+      setSelectedShopForToken({ ...shop, token: existingToken })
+      openTokenDialog()
+    } else {
+      // Generate new token
+      const newToken = `TK${shopId}${Date.now().toString().slice(-4)}`
+      const tokenData = {
+        shopName: shop.name,
+        shopId: shop.id,
+        items: [],
+        total: 0,
+        token: newToken,
+        timestamp: new Date().toISOString()
+      }
+      setShopToken(shopId, tokenData)
+      setSelectedShopForToken({ ...shop, token: tokenData })
+      openTokenDialog()
     }
   }
 
@@ -260,10 +288,15 @@ function LandingPage() {
                   </div>
                 </div>
                 
-                <button className="order-button" onClick={() => handleOrderClick(shop.id)}>
-                  View Menu
-                  <span className="arrow-icon">→</span>
-                </button>
+                <div className="shop-buttons">
+                  <button className="token-button" onClick={() => handleTokenClick(shop.id)}>
+                    🎫 Token
+                  </button>
+                  <button className="order-button" onClick={() => handleOrderClick(shop.id)}>
+                    View Menu
+                    <span className="arrow-icon">→</span>
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -315,11 +348,19 @@ function LandingPage() {
       </div>
 
       {/* Logout Dialog */}
-      <LogoutDialog 
+      <LogoutDialog
         isOpen={showLogoutDialog}
         onConfirm={handleLogoutConfirm}
         onCancel={handleLogoutCancel}
       />
+
+      {/* Token Dialog */}
+      {showTokenDialog && selectedShopForToken && selectedShopForToken.token && (
+        <TokenDisplay
+          orderData={selectedShopForToken.token}
+          onClose={closeTokenDialog}
+        />
+      )}
     </div>
   )
 }
