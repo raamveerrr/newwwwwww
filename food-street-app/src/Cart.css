@@ -522,32 +522,72 @@
 /* Enhanced Mobile Cart Footer */
 @media (max-width: 768px) {
   .cart-footer {
-    position: sticky !important;
+    position: fixed !important;
     bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
     background: white !important;
-    border-top: 2px solid #e2e8f0 !important;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15) !important;
-    z-index: 1001 !important;
+    border-top: 3px solid #667eea !important;
+    box-shadow: 0 -6px 25px rgba(0, 0, 0, 0.2) !important;
+    z-index: 10000 !important; /* Highest z-index to ensure visibility */
     /* Ensure it's above all content */
     margin-top: 0 !important;
-    padding: 16px 20px !important;
+    padding: 20px 16px !important;
     /* Safe area padding for notched devices */
-    padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+    padding-bottom: max(20px, env(safe-area-inset-bottom)) !important;
+    /* Ensure footer doesn't get cut off */
+    min-height: 80px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    /* Prevent any layout shifts */
+    transform: translateZ(0) !important;
+    will-change: transform !important;
   }
-  
+
+  .cart-summary {
+    margin-bottom: 12px !important;
+    font-size: 0.9rem !important;
+  }
+
   .checkout-btn {
     /* Ensure button is always visible and clickable */
     position: relative !important;
-    z-index: 1002 !important;
+    z-index: 10001 !important; /* Even higher than footer */
     /* Enhanced mobile styling */
-    padding: 16px 20px !important;
-    font-size: 1.1rem !important;
-    font-weight: 700 !important;
-    min-height: 48px !important;
+    padding: 18px 24px !important;
+    font-size: 1.2rem !important;
+    font-weight: 800 !important;
+    min-height: 56px !important; /* Larger touch target */
+    width: 100% !important;
     /* Ensure button is prominent */
-    box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3) !important;
+    box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4) !important;
     /* Prevent button from being hidden */
     white-space: nowrap !important;
+    /* Enhanced visibility */
+    border: 2px solid #48bb78 !important;
+    background: linear-gradient(135deg, #48bb78, #38a169) !important;
+    color: white !important;
+    /* Ensure button stands out */
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    /* Prevent any layout issues */
+    display: block !important;
+    margin: 0 auto !important;
+    max-width: 100% !important;
+    /* Enhanced touch feedback */
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  /* Ensure cart content doesn't overlap with fixed footer */
+  .cart-content {
+    padding-bottom: 120px !important; /* Extra space for fixed footer */
+  }
+
+  .cart-items {
+    padding-bottom: 140px !important; /* More space for footer */
   }
 }
 
