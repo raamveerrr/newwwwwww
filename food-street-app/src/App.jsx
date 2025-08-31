@@ -120,7 +120,7 @@ const shops = [
 
 // Landing Page Component with Pull-to-Refresh
 function LandingPage() {
-  const { currentUser, logout } = useAuth()
+  const { currentUser, userProfile, logout } = useAuth()
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
 
   // Pull-to-refresh functionality - only refreshes when at very top
