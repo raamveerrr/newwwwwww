@@ -9,6 +9,11 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  /* Enhanced mobile performance */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevent elastic scrolling */
+  overscroll-behavior: contain;
 }
 
 /* Allow text selection for input fields and content */
@@ -107,6 +112,7 @@ input, textarea, [contenteditable="true"], .selectable {
 body {
   margin: 0;
   min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
   background: var(--gradient-primary);
   position: relative;
   overflow-x: hidden;
@@ -125,6 +131,10 @@ body {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   position: relative;
+  /* Enhanced mobile support */
+  touch-action: manipulation;
+  font-feature-settings: "kern" 1;
+  text-rendering: optimizeLegibility;
 }
 
 /* Premium animated gradient background */
@@ -159,6 +169,11 @@ body::before {
 #root {
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
+  position: relative;
+  /* Enhanced mobile scrolling */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 /* Smooth scrolling */
