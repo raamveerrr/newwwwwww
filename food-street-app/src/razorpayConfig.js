@@ -28,7 +28,29 @@ export const getRazorpayKey = () => {
 // Check if we're in development mode with invalid keys
 export const isDevelopmentMode = () => {
   const key = getRazorpayKey()
-  return !key || key === 'rzp_test_1234567890' || key.includes('YOUR_NEW_VALID_KEY_HERE')
+  const isLocalhost = window.location.hostname === 'localhost' || 
+                     window.location.hostname === '127.0.0.1' ||
+                     window.location.hostname === '0.0.0.0'
+  const isDevEnvironment = import.meta.env.DEV
+  
+  // Consider development mode only if:
+  // 1. Running on localhost/127.0.0.1 OR
+  // 2. Vite dev environment OR 
+  // 3. Using placeholder/test keys
+  const hasTestKey = !key || key === 'rzp_test_1234567890' || key.includes('YOUR_NEW_VALID_KEY_HERE')
+  
+  const isDev = isLocalhost || isDevEnvironment || (hasTestKey && !window.location.hostname.includes('netlify.app'))
+  
+  console.log('🔍 Payment mode detection:', {
+    hostname: window.location.hostname,
+    isLocalhost,
+    isDevEnvironment,
+    hasTestKey,
+    isDev,
+    keyPresent: !!key
+  })
+  
+  return isDev
 }
 
 // Mock payment for development

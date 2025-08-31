@@ -1,10 +1,20 @@
 // Automated Receipt Printing Service
 export class PrinterService {
   constructor() {
-    // Check if we're in development mode
+    // Check if we're in development mode or HTTPS production
     this.isDevelopment = window.location.hostname === 'localhost' || 
                         window.location.hostname === '127.0.0.1' ||
+                        window.location.hostname === '0.0.0.0' ||
                         import.meta.env.DEV
+    
+    // Check if we're in HTTPS production (disable network printers)
+    this.isHTTPS = window.location.protocol === 'https:'
+    this.isNetlifyProduction = window.location.hostname.includes('netlify.app') || 
+                               window.location.hostname.includes('digitalfoodstreet')
+    this.isProduction = !this.isDevelopment && (this.isHTTPS || this.isNetlifyProduction)
+    
+    // Only use network printers in local HTTP development
+    this.useNetworkPrinters = this.isDevelopment && !this.isHTTPS && !this.isNetlifyProduction
     
     this.printerEndpoints = {
       'zuzu': 'http://192.168.1.100:8080/print', // ZUZU shop printer IP
@@ -65,6 +75,21 @@ export class PrinterService {
     }
     
     console.log(this.isDevelopment ? '🧪 PrinterService: Development mode' : '🖨️ PrinterService: Production mode')
+    console.log(`🌐 Environment details:`, {
+      hostname: window.location.hostname,
+      protocol: window.location.protocol,
+      isDevelopment: this.isDevelopment,
+      isHTTPS: this.isHTTPS,
+      isNetlifyProduction: this.isNetlifyProduction,
+      isProduction: this.isProduction,
+      useNetworkPrinters: this.useNetworkPrinters
+    })
+    if (this.isProduction) {
+      console.log('🌐 HTTPS Production detected - Network printers disabled for security')
+    }
+    if (this.useNetworkPrinters) {
+      console.log('🔗 Network printers enabled (local development)')
+    }
   }
 
   // Generate formatted receipt content
@@ -114,9 +139,10 @@ Thank you for choosing Food Street!
     return receipt
   }
 
-  // Mock printing for development
+  // Mock printing for development and HTTPS production
   async mockPrint(shopId, orderData) {
-    console.log(`🧪 Mock printing for ${orderData.shopName}:`)
+    const environmentLabel = this.isProduction ? 'HTTPS Production' : 'Development'
+    console.log(`🧪 Mock printing for ${orderData.shopName} (${environmentLabel}):`)
     
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 1000))
@@ -132,22 +158,29 @@ Thank you for choosing Food Street!
       success: true,
       printerId: `mock_printer_${shopId}`,
       timestamp: new Date().toISOString(),
-      isDevelopment: true
+      isDevelopment: this.isDevelopment,
+      isProduction: this.isProduction,
+      environment: environmentLabel
     }
     
-    console.log(`✅ Mock receipt printed successfully for ${orderData.shopName}`)
+    console.log(`✅ Mock receipt printed successfully for ${orderData.shopName} (${environmentLabel})`)
     return mockResult
   }
 
   // Send receipt to specific shop printer with queue management
   async sendToPrinter(shopId, orderData) {
-    // Development mode - simulate printing
-    if (this.isDevelopment) {
+    // Development mode OR HTTPS production - simulate printing
+    if (this.isDevelopment || this.isProduction) {
       return this.mockPrint(shopId, orderData)
     }
     
-    // Add to print queue for concurrency management
-    return this.addToPrintQueue(shopId, orderData)
+    // Only use network printers in local HTTP development
+    if (this.useNetworkPrinters) {
+      return this.addToPrintQueue(shopId, orderData)
+    }
+    
+    // Fallback to mock printing
+    return this.mockPrint(shopId, orderData)
   }
   
   // Queue management for concurrent printing

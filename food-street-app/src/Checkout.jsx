@@ -160,8 +160,12 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
 
     setIsProcessing(true)
 
+    // Force production mode on Netlify regardless of Razorpay keys
+    const isNetlifyProduction = window.location.hostname.includes('netlify.app') || 
+                               window.location.hostname.includes('digitalfoodstreet')
+    
     // Check if we should use mock payment (development mode)
-    if (isDevelopmentMode()) {
+    if (isDevelopmentMode() && !isNetlifyProduction) {
       console.log('🧪 Development mode detected - using mock payment')
       
       try {
@@ -234,6 +238,11 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
         setIsProcessing(false)
       }
       return
+    }
+
+    // Production payment flow or when mock payments are disabled
+    if (isNetlifyProduction) {
+      console.log('🖨️ Production environment detected - using Razorpay')
     }
 
     try {
