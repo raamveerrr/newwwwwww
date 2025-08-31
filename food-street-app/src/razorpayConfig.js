@@ -21,7 +21,13 @@ export const razorpayConfig = {
 // For production, use environment variables
 export const getRazorpayKey = () => {
   const key = import.meta.env.VITE_RAZORPAY_KEY_ID || razorpayConfig.keyId
-  console.log('🔑 Using Razorpay Key:', key ? `${key.substring(0, 12)}...` : 'No key found')
+  console.log('🔑 Razorpay Key Status:', {
+    envKey: import.meta.env.VITE_RAZORPAY_KEY_ID ? 'Present' : 'Missing',
+    fallbackKey: razorpayConfig.keyId,
+    finalKey: key ? `${key.substring(0, 12)}...` : 'No key found',
+    keyLength: key?.length || 0,
+    isValidFormat: key?.startsWith('rzp_') || false
+  })
   return key
 }
 

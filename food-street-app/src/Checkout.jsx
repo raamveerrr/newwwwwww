@@ -292,7 +292,26 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
       script.onload = () => {
         const razorpayKey = getRazorpayKey()
         
-        if (!razorpayKey || razorpayKey === 'rzp_test_1234567890') {
+        console.log('💳 Payment Key Validation:', {
+          key: razorpayKey,
+          isValid: !!(razorpayKey && razorpayKey !== 'rzp_test_1234567890'),
+          keyFormat: razorpayKey?.startsWith('rzp_') ? 'Valid Format' : 'Invalid Format'
+        })
+        
+        // More robust key validation - check if it's a real Razorpay key
+        const isValidRazorpayKey = razorpayKey && 
+                                  razorpayKey.startsWith('rzp_') && 
+                                  razorpayKey !== 'rzp_test_1234567890' &&
+                                  razorpayKey.length > 20
+        
+        if (!isValidRazorpayKey) {
+          console.error('😱 Razorpay key validation failed:', {
+            keyPresent: !!razorpayKey,
+            keyValue: razorpayKey,
+            envVars: {
+              VITE_RAZORPAY_KEY_ID: import.meta.env.VITE_RAZORPAY_KEY_ID
+            }
+          })
           alert('⚠️ Razorpay configuration error. Please check your API keys.')
           setIsProcessing(false)
           return

@@ -21,6 +21,7 @@ import TermsAndConditions from './TermsAndConditions'
 import CancellationRefunds from './CancellationRefunds'
 import ShippingPolicy from './ShippingPolicy'
 import ContactUs from './ContactUs'
+import DebugEnv from './DebugEnv'
 import './App.css'
 
 // Protected Route Component
@@ -354,6 +355,7 @@ function App() {
             </Routes>
             <Cart />
             <MobileNavigation />
+            <DebugEnv />
           </Router>
         </TokenProvider>
       </CartProvider>
