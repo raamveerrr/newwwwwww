@@ -208,8 +208,7 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
                                window.location.hostname.includes('digitalfoodstreet')
     
     // Check if we should use mock payment (development mode)
-    // TEMPORARILY DISABLED: Force real Razorpay for testing
-    const FORCE_REAL_RAZORPAY = true // Set to false to use mock payments
+    const FORCE_REAL_RAZORPAY = false // Set to true to force real Razorpay payments
 
     if (isDevelopmentMode() && !isNetlifyProduction && !FORCE_REAL_RAZORPAY) {
       console.log('🧪 Development mode detected - using mock payment')
