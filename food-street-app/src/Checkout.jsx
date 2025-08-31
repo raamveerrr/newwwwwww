@@ -253,7 +253,7 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
                 // Store order in token context for later access
                 setNewOrder(completedOrderData)
                 setCompletedOrder(completedOrderData)
-                clearCart()
+                clearCart() // Clear cart immediately after successful payment
                 onOrderSuccess(completedOrderData)
                 
                 // Show payment success dialog
@@ -353,9 +353,8 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
                   // Store order in token context for later access
                   setNewOrder(completedOrderData)
                   setCompletedOrder(completedOrderData)
-                  
                   // Clear cart and show payment success
-                  clearCart()
+                  clearCart() // Clear cart immediately after successful payment
                   onOrderSuccess(completedOrderData)
                   
                   // Show payment success dialog
@@ -495,9 +494,7 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
               </div>
               <ul>
                 <li>📱 You'll receive a <strong>Token Number</strong> after payment</li>
-                <li>🏃‍♂️ Visit the respective shop(s) to collect your order</li>
                 <li>🎫 Show your token number to the shopkeeper</li>
-                <li>⏰ Estimated preparation time will be provided</li>
               </ul>
             </div>
           </div>

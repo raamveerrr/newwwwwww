@@ -11,6 +11,8 @@
   align-items: center;
   z-index: 10000;
   padding: 20px;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 .token-container {

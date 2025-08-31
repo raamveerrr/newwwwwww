@@ -70,7 +70,10 @@ export function CartProvider({ children }) {
 
   // Clear entire cart
   function clearCart() {
+    console.log('🗑️ Clearing cart...')
     setCartItems([])
+    // Also clear from localStorage immediately
+    localStorage.removeItem('foodStreetCart')
   }
 
   // Calculate total price

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useCart } from './CartContext'
 import { useAuth } from './AuthContext'
+import { useToken } from './TokenContext'
 import { Link } from 'react-router-dom'
 import Checkout from './Checkout'
 import OrderSuccess from './OrderSuccess'
@@ -15,10 +16,12 @@ function Cart() {
     updateQuantity,
     removeFromCart,
     getTotalPrice,
-    getTotalItems
+    getTotalItems,
+    clearCart
   } = useCart()
 
   const { currentUser } = useAuth()
+  const { latestOrder } = useToken()
   const [showCheckout, setShowCheckout] = useState(false)
   const [showOrderSuccess, setShowOrderSuccess] = useState(false)
   const [orderData, setOrderData] = useState(null)
@@ -142,12 +145,12 @@ function Cart() {
       alert('Please login to checkout')
       return
     }
-    
+
     if (cartItems.length === 0) {
       alert('Your cart is empty')
       return
     }
-    
+
     setShowCheckout(true)
   }
 
@@ -156,6 +159,7 @@ function Cart() {
     setShowCheckout(false)
     setShowOrderSuccess(true)
     toggleCart() // Close cart
+    clearCart() // Clear cart after successful order
   }
 
   return (
