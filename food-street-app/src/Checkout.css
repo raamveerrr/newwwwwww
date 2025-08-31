@@ -4,19 +4,19 @@ html, body {
   overflow-x: hidden;
 }
 
-/* Checkout Component Styles - Professional Swiggy/Dominos Design */
+/* Checkout Component Styles */
 .checkout-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2000;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(5px);
   padding: 20px;
 }
 
@@ -25,126 +25,72 @@ html, body {
   max-width: 600px;
   max-height: 90vh;
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: slideUp 0.3s ease;
 }
 
 .checkout-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 28px;
-  background: linear-gradient(135deg, #fc8019, #ff6b35);
+  padding: 25px 30px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
-  flex-shrink: 0;
-  position: relative;
-  overflow: hidden;
-}
-
-.checkout-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(255, 255, 255, 0.1) 100%);
-  animation: shimmer 2s infinite;
 }
 
 .checkout-header h2 {
   margin: 0;
-  font-size: 1.75rem;
-  font-weight: 800;
-  position: relative;
-  z-index: 1;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 1.8rem;
+  font-weight: 700;
 }
 
 .close-checkout-btn {
-  background: rgba(255, 255, 255, 0.15);
+  background: none;
   border: none;
   color: white;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   cursor: pointer;
-  padding: 8px;
+  padding: 5px;
   border-radius: 50%;
-  transition: all 0.3s ease;
-  position: relative;
-  z-index: 1;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: background 0.3s ease;
 }
 
 .close-checkout-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .checkout-content {
   flex: 1;
   overflow-y: auto;
-  padding: 28px;
-  -webkit-overflow-scrolling: touch;
+  padding: 30px;
 }
 
-/* Order Summary - Professional Design */
+/* Order Summary */
 .order-summary {
-  margin-bottom: 28px;
-  padding: 24px;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border-radius: 12px;
+  margin-bottom: 30px;
+  padding: 25px;
+  background: #f8fafc;
+  border-radius: 15px;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  position: relative;
-}
-
-.order-summary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #fc8019, #ff6b35);
-  border-radius: 12px 12px 0 0;
 }
 
 .order-summary h3 {
   margin: 0 0 20px 0;
-  color: #1e293b;
-  font-size: 1.4rem;
+  color: #2d3748;
+  font-size: 1.3rem;
   font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.order-summary h3::before {
-  content: '🛒';
-  font-size: 1.2rem;
 }
 
 .order-item {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 0;
+  gap: 15px;
+  padding: 12px 0;
   border-bottom: 1px solid #e2e8f0;
-  transition: all 0.2s ease;
-}
-
-.order-item:hover {
-  background: rgba(252, 128, 25, 0.05);
-  border-radius: 8px;
-  padding-left: 8px;
-  padding-right: 8px;
 }
 
 .order-item:last-child {
@@ -152,8 +98,7 @@ html, body {
 }
 
 .order-item .item-emoji {
-  font-size: 1.8rem;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  font-size: 1.5rem;
 }
 
 .order-item .item-details {
@@ -162,66 +107,47 @@ html, body {
 
 .order-item .item-name {
   font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 4px;
-  font-size: 1rem;
+  color: #2d3748;
+  margin-bottom: 2px;
 }
 
 .order-item .item-shop {
-  font-size: 0.85rem;
-  color: #64748b;
-  opacity: 0.9;
-  font-weight: 500;
+  font-size: 0.8rem;
+  color: #4a5568;
+  opacity: 0.8;
 }
 
 .order-item .item-quantity {
-  color: #64748b;
+  color: #4a5568;
   font-weight: 600;
-  background: #f1f5f9;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.9rem;
 }
 
 .order-item .item-total {
-  color: #fc8019;
+  color: #667eea;
   font-weight: 700;
   font-size: 1.1rem;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .order-total {
-  margin-top: 20px;
-  padding-top: 20px;
+  margin-top: 15px;
+  padding-top: 15px;
   border-top: 2px solid #e2e8f0;
-  font-size: 1.4rem;
-  color: #1e293b;
+  font-size: 1.3rem;
+  color: #2d3748;
   text-align: right;
-  font-weight: 800;
-  background: linear-gradient(135deg, #fc8019, #ff6b35);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-weight: 700;
 }
 
-/* Customer Information - Professional Form Design */
+/* Customer Information */
 .customer-info {
-  margin-bottom: 28px;
+  margin-bottom: 30px;
 }
 
 .customer-info h3 {
   margin: 0 0 20px 0;
-  color: #1e293b;
-  font-size: 1.4rem;
+  color: #2d3748;
+  font-size: 1.3rem;
   font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.customer-info h3::before {
-  content: '👤';
-  font-size: 1.2rem;
 }
 
 .form-group {
@@ -231,37 +157,28 @@ html, body {
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  color: #374151;
+  color: #2d3748;
   font-weight: 600;
   font-size: 0.95rem;
-  position: relative;
-}
-
-.form-group label::after {
-  content: ' *';
-  color: #ef4444;
-  font-weight: 700;
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
-  padding: 14px 16px;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
+  padding: 12px 15px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
   font-size: 1rem;
   transition: all 0.3s ease;
   background: white;
   box-sizing: border-box;
-  font-family: inherit;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #fc8019;
-  box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.1);
-  transform: translateY(-1px);
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .form-group textarea {
@@ -269,39 +186,27 @@ html, body {
   min-height: 80px;
 }
 
-/* Pickup Note - Professional Design */
+/* Pickup Note */
 .pickup-note {
-  background: linear-gradient(135deg, rgba(252, 128, 25, 0.08), rgba(255, 107, 53, 0.08));
-  border: 2px solid rgba(252, 128, 25, 0.15);
-  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  border-radius: 15px;
   padding: 20px;
   margin-top: 20px;
-  position: relative;
-  overflow: hidden;
-}
-
-.pickup-note::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #fc8019, #ff6b35);
 }
 
 .note-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
-  color: #fc8019;
+  gap: 8px;
+  margin-bottom: 15px;
+  color: #667eea;
   font-size: 1.1rem;
   font-weight: 700;
 }
 
 .note-icon {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
 }
 
 .pickup-note ul {
@@ -311,57 +216,40 @@ html, body {
 }
 
 .pickup-note li {
-  padding: 10px 0;
-  color: #4b5563;
+  padding: 8px 0;
+  color: #4a5568;
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  gap: 8px;
 }
 
 .pickup-note li::before {
   content: '✓';
-  color: #fc8019;
+  color: #667eea;
   font-weight: 700;
   font-size: 1.1rem;
-  background: rgba(252, 128, 25, 0.1);
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
 }
 
 .pickup-note strong {
-  color: #1e293b;
-  font-weight: 600;
+  color: #2d3748;
 }
 
-/* Payment Section - CRITICAL: Always ensure this is visible */
+/* Payment Section */
 .payment-section {
   text-align: center;
-  /* Ensure payment section is always visible */
-  position: sticky;
-  bottom: 0;
-  background: white;
   padding: 20px 0;
-  margin-top: 24px;
+  margin-top: 20px;
   border-top: 2px solid #f1f5f9;
-  z-index: 100;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .pay-now-btn {
   width: 100%;
-  background: linear-gradient(135deg, #fc8019, #ff6b35);
+  background: linear-gradient(135deg, #48bb78, #38a169);
   color: white;
   border: none;
   padding: 18px 30px;
-  border-radius: 12px;
+  border-radius: 15px;
   font-size: 1.2rem;
   font-weight: 700;
   cursor: pointer;
@@ -369,39 +257,14 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  /* Ensure button is always clickable */
-  min-height: 56px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 8px 25px rgba(252, 128, 25, 0.3);
-}
-
-.pay-now-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.pay-now-btn:hover::before {
-  left: 100%;
+  gap: 10px;
+  margin-bottom: 15px;
 }
 
 .pay-now-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #ff6b35, #fc8019);
+  background: linear-gradient(135deg, #38a169, #2f855a);
   transform: translateY(-2px);
-  box-shadow: 0 12px 35px rgba(252, 128, 25, 0.4);
-}
-
-.pay-now-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 6px 20px rgba(252, 128, 25, 0.3);
+  box-shadow: 0 10px 25px rgba(72, 187, 120, 0.3);
 }
 
 .pay-now-btn:disabled {
@@ -411,36 +274,34 @@ html, body {
 }
 
 .payment-icon {
-  font-size: 1.6rem;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  font-size: 1.5rem;
 }
 
 .loading-spinner {
-  width: 24px;
-  height: 24px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   border-top-color: white;
   animation: spin 1s ease-in-out infinite;
 }
 
 .payment-note {
-  color: #6b7280;
+  color: #4a5568;
   font-size: 0.9rem;
   margin: 0;
   opacity: 0.8;
-  font-weight: 500;
 }
 
 /* Animations */
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(60px) scale(0.95);
+    transform: translateY(50px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
@@ -450,58 +311,31 @@ html, body {
   }
 }
 
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-/* MOBILE-FIRST RESPONSIVE DESIGN - FIXING THE VIEWPORT ISSUE */
+/* Responsive Design */
 @media (max-width: 768px) {
   .checkout-overlay {
     padding: 10px;
-    /* Ensure full mobile viewport usage */
-    align-items: flex-start;
-    padding-top: 20px;
   }
   
   .checkout-container {
-    /* Use full mobile height minus safe area */
-    max-height: calc(100vh - 40px);
-    height: calc(100vh - 40px);
-    /* Ensure proper mobile layout */
-    display: flex;
-    flex-direction: column;
-    border-radius: 12px;
+    max-height: 95vh;
   }
   
   .checkout-content {
     padding: 20px;
-    /* Ensure content can scroll and payment section is visible */
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: 100px; /* Space for sticky payment section */
+  }
+  
+  .checkout-header {
+    padding: 20px 25px;
   }
   
   .order-summary {
     padding: 20px;
   }
   
-  .checkout-header {
-    padding: 20px 24px;
-    flex-shrink: 0;
-  }
-  
-  .checkout-header h2 {
-    font-size: 1.5rem;
-  }
-  
   .order-item {
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 10px;
   }
   
   .order-item .item-details {
@@ -509,59 +343,35 @@ html, body {
   }
   
   .pay-now-btn {
-    padding: 16px 24px;
+    padding: 15px 25px;
     font-size: 1.1rem;
-    /* Ensure button is always visible */
-    position: sticky;
-    bottom: 0;
-    z-index: 100;
-  }
-  
-  /* Payment section sticky positioning for mobile */
-  .payment-section {
-    position: sticky;
-    bottom: 0;
-    background: white;
-    padding: 16px 0;
-    margin-top: 20px;
-    border-top: 2px solid #f1f5f9;
-    z-index: 100;
   }
 }
 
-@media (max-width: 480px) and (orientation: portrait) {
+@media (max-width: 480px) {
   .checkout-overlay {
     padding: 5px;
-    padding-top: 15px;
-    align-items: flex-start;
   }
   
   .checkout-container {
-    /* Use full mobile height with safe margins */
-    max-height: calc(100vh - 30px);
-    height: calc(100vh - 30px);
-    border-radius: 12px;
+    max-height: 98vh;
+    border-radius: 15px;
   }
   
   .checkout-header {
-    padding: 16px 20px;
-    flex-shrink: 0;
+    padding: 15px 20px;
   }
   
   .checkout-header h2 {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
   }
   
   .checkout-content {
-    padding: 16px;
-    /* Ensure content scrolls properly */
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: 120px; /* Extra space for payment section */
+    padding: 15px;
   }
   
   .order-summary {
-    padding: 16px;
+    padding: 15px;
     margin-bottom: 20px;
   }
   
@@ -569,7 +379,7 @@ html, body {
     flex-direction: column;
     align-items: flex-start;
     text-align: left;
-    padding: 12px 0;
+    padding: 10px 0;
   }
   
   .order-item .item-quantity,
@@ -578,64 +388,46 @@ html, body {
   }
   
   .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 15px;
   }
   
   .form-group input,
   .form-group textarea {
-    padding: 12px 14px;
+    padding: 10px 12px;
     font-size: 0.95rem;
   }
   
   .pickup-note {
-    padding: 16px;
-    margin-top: 16px;
+    padding: 15px;
+    margin-top: 15px;
   }
   
   .pay-now-btn {
     padding: 14px 20px;
     font-size: 1rem;
-    border-radius: 10px;
-    /* Ensure button is always visible on mobile */
-    position: sticky;
-    bottom: 0;
-    z-index: 100;
-  }
-  
-  /* Payment section sticky positioning */
-  .payment-section {
-    position: sticky;
-    bottom: 0;
-    background: white;
-    padding: 16px 0;
-    margin-top: 20px;
-    border-top: 2px solid #f1f5f9;
-    z-index: 100;
+    border-radius: 12px;
   }
 }
 
-/* Force Portrait Layout on Landscape Mobile Screens */
-@media (max-width: 968px) and (orientation: landscape) {
+@media (max-width: 768px) and (orientation: landscape) {
   .checkout-overlay {
-    /* Center the checkout modal in landscape */
     justify-content: center;
     align-items: center;
     padding: 10px;
   }
   
   .checkout-container {
-    /* Modal-style checkout in landscape */
     width: min(600px, 85vw);
     height: min(500px, 90vh);
     max-height: 90vh;
-    border-radius: 16px;
+    border-radius: 20px;
     position: relative;
     display: flex;
     flex-direction: column;
   }
   
   .checkout-header {
-    padding: 16px 20px;
+    padding: 15px 20px;
     flex-shrink: 0;
   }
   
@@ -646,65 +438,47 @@ html, body {
   .checkout-content {
     flex: 1;
     overflow-y: auto;
-    padding: 16px 20px 20px;
+    padding: 15px 20px 20px;
     -webkit-overflow-scrolling: touch;
-    /* Ensure payment section is visible */
-    padding-bottom: 100px;
   }
   
   .order-summary {
-    padding: 16px;
-    margin-bottom: 16px;
+    padding: 15px;
+    margin-bottom: 15px;
   }
   
   .order-item {
-    padding: 10px 0;
-    gap: 10px;
+    padding: 8px 0;
+    gap: 8px;
   }
   
   .form-group {
-    margin-bottom: 16px;
+    margin-bottom: 15px;
   }
   
   .form-group input,
   .form-group textarea {
-    padding: 10px 14px;
+    padding: 8px 12px;
     font-size: 0.9rem;
   }
   
   .pickup-note {
-    padding: 14px;
-    margin-top: 14px;
+    padding: 12px;
+    margin-top: 12px;
   }
   
   .pickup-note li {
-    padding: 6px 0;
+    padding: 4px 0;
     font-size: 0.85rem;
   }
   
   .pay-now-btn {
-    padding: 14px 20px;
+    padding: 12px 18px;
     font-size: 1rem;
-    border-radius: 10px;
-    /* Ensure button is visible in landscape */
-    position: sticky;
-    bottom: 0;
-    z-index: 100;
-  }
-  
-  /* Payment section sticky positioning for landscape */
-  .payment-section {
-    position: sticky;
-    bottom: 0;
-    background: white;
-    padding: 16px 0;
-    margin-top: 20px;
-    border-top: 2px solid #f1f5f9;
-    z-index: 100;
+    border-radius: 12px;
   }
 }
 
-/* Extra Small Landscape Screens - Force Modal Behavior */
 @media (max-width: 768px) and (orientation: landscape) and (max-height: 500px) {
   .checkout-overlay {
     justify-content: center !important;
@@ -716,12 +490,12 @@ html, body {
     width: min(500px, 95vw) !important;
     height: min(420px, 95vh) !important;
     max-height: 95vh !important;
-    border-radius: 12px !important;
+    border-radius: 15px !important;
     overflow: hidden;
   }
   
   .checkout-header {
-    padding: 12px 16px !important;
+    padding: 10px 15px !important;
     min-height: 50px;
     flex-shrink: 0;
   }
@@ -731,26 +505,24 @@ html, body {
   }
   
   .checkout-content {
-    padding: 12px 16px 16px !important;
+    padding: 10px 15px 15px !important;
     flex: 1;
     overflow-y: auto;
-    /* Ensure payment section is visible */
-    padding-bottom: 80px;
   }
   
   .order-summary {
-    padding: 12px !important;
-    margin-bottom: 12px !important;
+    padding: 10px !important;
+    margin-bottom: 10px !important;
   }
   
   .order-summary h3 {
     font-size: 1rem !important;
-    margin-bottom: 12px !important;
+    margin-bottom: 10px !important;
   }
   
   .order-item {
-    padding: 8px 0 !important;
-    gap: 8px !important;
+    padding: 6px 0 !important;
+    gap: 6px !important;
   }
   
   .order-item .item-name {
@@ -758,248 +530,47 @@ html, body {
   }
   
   .order-item .item-shop {
-    font-size: 0.75rem !important;
+    font-size: 0.7rem !important;
   }
   
   .form-group {
-    margin-bottom: 12px !important;
+    margin-bottom: 10px !important;
   }
   
   .form-group label {
     font-size: 0.85rem !important;
-    margin-bottom: 6px !important;
+    margin-bottom: 4px !important;
   }
   
   .form-group input,
   .form-group textarea {
-    padding: 8px 12px !important;
+    padding: 6px 8px !important;
     font-size: 0.85rem !important;
   }
   
   .pickup-note {
-    padding: 10px !important;
-    margin-top: 10px !important;
+    padding: 8px !important;
+    margin-top: 8px !important;
   }
   
   .note-header {
     font-size: 0.9rem !important;
-    margin-bottom: 10px !important;
+    margin-bottom: 8px !important;
   }
   
   .pickup-note li {
-    padding: 4px 0 !important;
+    padding: 2px 0 !important;
     font-size: 0.75rem !important;
   }
   
   .pay-now-btn {
-    padding: 10px 16px !important;
+    padding: 8px 12px !important;
     font-size: 0.9rem !important;
-    border-radius: 8px !important;
-    min-height: 40px !important;
-    /* Ensure button is always visible */
-    position: sticky !important;
-    bottom: 0 !important;
-    z-index: 100 !important;
+    border-radius: 10px !important;
+    min-height: 36px !important;
   }
   
   .payment-note {
     font-size: 0.75rem !important;
-  }
-  
-  /* Payment section sticky positioning for small landscape */
-  .payment-section {
-    position: sticky !important;
-    bottom: 0 !important;
-    background: white !important;
-    padding: 12px 0 !important;
-    margin-top: 12px !important;
-    border-top: 2px solid #f1f5f9 !important;
-    z-index: 100 !important;
-  }
-}
-
-/* ADDITIONAL MOBILE OPTIMIZATIONS - ENSURING BUTTON VISIBILITY */
-@media (max-width: 480px) {
-  .checkout-overlay {
-    /* Force full mobile viewport usage */
-    padding: 0;
-    align-items: flex-start;
-  }
-  
-  .checkout-container {
-    /* Use full mobile height */
-    height: 100vh;
-    max-height: 100vh;
-    border-radius: 0;
-    /* Ensure proper mobile layout */
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .checkout-content {
-    /* Ensure content scrolls properly */
-    flex: 1;
-    overflow-y: auto;
-    /* Extra space for payment section */
-    padding-bottom: 140px;
-    /* Smooth scrolling on mobile */
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-  }
-  
-  .payment-section {
-    /* Always visible at bottom */
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    padding: 16px 20px;
-    border-top: 2px solid #f1f5f9;
-    z-index: 1000;
-    /* Ensure it's above everything */
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-  }
-  
-  .pay-now-btn {
-    /* Always visible and clickable */
-    position: relative;
-    z-index: 1001;
-    /* Ensure button is prominent */
-    box-shadow: 0 4px 15px rgba(252, 128, 25, 0.3);
-    /* Prevent button from being cut off */
-    margin: 0;
-  }
-}
-
-/* FINAL MOBILE OPTIMIZATION - FORCE BUTTON VISIBILITY */
-@media (max-width: 768px) {
-  /* Override any conflicting styles */
-  .checkout-container {
-    /* Force mobile viewport usage */
-    height: calc(100vh - 40px) !important;
-    max-height: calc(100vh - 40px) !important;
-    /* Ensure proper mobile layout */
-    display: flex !important;
-    flex-direction: column !important;
-  }
-  
-  .checkout-content {
-    /* Force content scrolling */
-    flex: 1 !important;
-    overflow-y: auto !important;
-    /* Ensure payment section space */
-    padding-bottom: 120px !important;
-  }
-  
-  .payment-section {
-    /* Force sticky positioning */
-    position: sticky !important;
-    bottom: 0 !important;
-    background: white !important;
-    padding: 16px 0 !important;
-    margin-top: 20px !important;
-    border-top: 2px solid #f1f5f9 !important;
-    z-index: 1000 !important;
-    /* Ensure it's above everything */
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1) !important;
-  }
-  
-  .pay-now-btn {
-    /* Force button visibility */
-    position: sticky !important;
-    bottom: 0 !important;
-    z-index: 1001 !important;
-    /* Ensure button is prominent */
-    box-shadow: 0 4px 15px rgba(252, 128, 25, 0.3) !important;
-    /* Prevent button from being hidden */
-    min-height: 48px !important;
-    /* Ensure button is clickable */
-    white-space: nowrap !important;
-  }
-}
-
-/* EXTRA SMALL SCREENS - FORCE FULL VIEWPORT USAGE */
-@media (max-width: 360px) {
-  .checkout-overlay {
-    padding: 0;
-  }
-  
-  .checkout-container {
-    height: 100vh;
-    max-height: 100vh;
-    border-radius: 0;
-  }
-  
-  .checkout-header {
-    padding: 16px 20px;
-    flex-shrink: 0;
-  }
-  
-  .checkout-content {
-    padding: 16px;
-    padding-bottom: 150px;
-  }
-  
-  .payment-section {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    padding: 16px 20px;
-    border-top: 2px solid #f1f5f9;
-    z-index: 1000;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-  }
-  
-  .pay-now-btn {
-    position: relative;
-    z-index: 1001;
-    box-shadow: 0 4px 15px rgba(252, 128, 25, 0.3);
-  }
-}
-
-/* SAFE AREA SUPPORT FOR NOTCHED DEVICES */
-@supports (padding: max(0px)) {
-  .checkout-container {
-    /* Support for devices with notches */
-    padding-top: max(20px, env(safe-area-inset-top));
-    padding-bottom: max(20px, env(safe-area-inset-bottom));
-  }
-  
-  .payment-section {
-    /* Ensure payment section respects safe areas */
-    padding-bottom: max(16px, env(safe-area-inset-bottom));
-  }
-}
-
-/* PREVENT ZOOM ISSUES ON MOBILE */
-@media (max-width: 768px) {
-  .checkout-container {
-    /* Prevent content from being cut off */
-    min-height: 0;
-    /* Ensure proper flex behavior */
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .checkout-content {
-    /* Prevent horizontal overflow */
-    overflow-x: hidden;
-    /* Ensure vertical scrolling works */
-    overflow-y: auto;
-    /* Smooth scrolling */
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Ensure all form elements are properly sized */
-  .form-group input,
-  .form-group textarea {
-    /* Prevent zoom on iOS */
-    font-size: 16px;
-    /* Ensure proper touch targets */
-    min-height: 44px;
   }
 }

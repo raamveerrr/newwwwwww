@@ -15,6 +15,7 @@ import Orders from './Orders'
 import Admin from './Admin'
 import Cart from './Cart'
 import MobileNavigation from './MobileNavigation'
+import { usePullToRefresh } from './hooks/usePullToRefresh'
 // Policy Pages
 import PrivacyPolicy from './PrivacyPolicy'
 import TermsAndConditions from './TermsAndConditions'
@@ -117,36 +118,45 @@ const shops = [
   }
 ]
 
+// Landing Page Component with Pull-to-Refresh
 function LandingPage() {
-  const { currentUser, userProfile, logout } = useAuth()
+  const { currentUser, logout } = useAuth()
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
 
-  const handleOrderClick = (shopId) => {
-    // Navigate to respective shop menu
-    const routes = {
-      1: '/menu/zuzu',
-      2: '/menu/oasis', 
-      3: '/menu/bites',
-      4: '/menu/shakers'
-    }
-    window.location.href = routes[shopId]
+  // Pull-to-refresh functionality - only refreshes when at very top
+  const handleRefresh = async () => {
+    // Simulate a brief refresh delay like professional websites
+    await new Promise(resolve => setTimeout(resolve, 800))
+    // Reload the page to refresh all data
+    window.location.reload()
   }
+
+  const { containerRef, isPulling, isRefreshing, pullProgress } = usePullToRefresh(handleRefresh)
 
   const handleLogoutClick = () => {
     setShowLogoutDialog(true)
   }
 
-  const handleLogoutConfirm = async () => {
-    try {
-      await logout()
-      setShowLogoutDialog(false)
-    } catch (error) {
-      console.error('Failed to log out:', error)
-    }
+  const handleLogoutConfirm = () => {
+    logout()
+    setShowLogoutDialog(false)
   }
 
   const handleLogoutCancel = () => {
     setShowLogoutDialog(false)
+  }
+
+  const handleOrderClick = (shopId) => {
+    const shopRoutes = {
+      1: '/menu/zuzu',
+      2: '/menu/oasis',
+      3: '/menu/bites',
+      4: '/menu/shakers'
+    }
+    
+    if (shopRoutes[shopId]) {
+      window.location.href = shopRoutes[shopId]
+    }
   }
 
   // Show admin dashboard for admin users
@@ -155,7 +165,19 @@ function LandingPage() {
   }
 
   return (
-    <div className="app">
+    <div className="app" ref={containerRef}>
+      {/* Pull-to-Refresh Indicator */}
+      {isPulling && (
+        <div className="pull-to-refresh-indicator" style={{ transform: `translateY(${Math.min(pullProgress * 100, 100)}px)` }}>
+          <div className="refresh-icon">
+            {isRefreshing ? '⟳' : '↓'}
+          </div>
+          <span className="refresh-text">
+            {isRefreshing ? 'Refreshing...' : 'Pull to refresh'}
+          </span>
+        </div>
+      )}
+
       {/* Navigation Bar */}
       <nav className="navbar">
         <div className="nav-content">
