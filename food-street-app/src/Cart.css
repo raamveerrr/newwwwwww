@@ -1,4 +1,36 @@
 /* Enhanced Mobile-First Cart Component Styles */
+
+/* CSS Custom Properties for Consistent Mobile Spacing */
+:root {
+  /* Safe area insets with fallbacks */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+
+  /* Dynamic viewport height */
+  --vh: 1vh;
+
+  /* Consistent spacing units */
+  --spacing-xs: clamp(4px, 1vw, 8px);
+  --spacing-sm: clamp(8px, 2vw, 12px);
+  --spacing-md: clamp(12px, 3vw, 16px);
+  --spacing-lg: clamp(16px, 4vw, 20px);
+  --spacing-xl: clamp(20px, 5vw, 24px);
+
+  /* Mobile-specific dimensions */
+  --mobile-footer-height: 120px;
+  --mobile-touch-target: 44px;
+  --mobile-border-radius: 16px;
+  --mobile-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+
+  /* Z-index layers */
+  --z-cart-overlay: 1000;
+  --z-cart-header: 1001;
+  --z-cart-footer: 10000;
+  --z-cart-button: 10001;
+}
+
 .cart-overlay {
   position: fixed;
   top: 0;
@@ -8,7 +40,7 @@
   background: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: flex-end;
-  z-index: 1000;
+  z-index: var(--z-cart-overlay);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   /* Enhanced mobile support */
@@ -77,7 +109,7 @@
     bottom: 0 !important;
     left: 0 !important;
     right: 0 !important;
-    width: 100% !important;
+    width: 100vw !important;
     padding: 1.5rem 1rem;
     background: white;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
@@ -95,6 +127,71 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    /* Ensure footer is always visible */
+    transform: translateZ(0) !important;
+    will-change: transform !important;
+    /* Prevent any clipping */
+    max-height: 200px !important;
+    overflow: visible !important;
+    /* Force visibility on mobile */
+    visibility: visible !important;
+    opacity: 1 !important;
+    /* Ensure proper stacking context */
+    isolation: isolate !important;
+    /* Additional mobile viewport fixes */
+    height: auto !important;
+    /* Ensure footer stays within viewport bounds */
+    max-height: calc(100vh - env(safe-area-inset-top)) !important;
+    /* Force proper positioning */
+    top: auto !important;
+    /* Prevent any transform issues */
+    transform-origin: center bottom !important;
+    /* Critical mobile visibility fixes */
+    /* Ensure footer is always within viewport */
+    bottom: max(0px, env(safe-area-inset-bottom)) !important;
+    /* Prevent any negative margins or positioning */
+    margin: 0 !important;
+    /* Force proper stacking */
+    contain: layout style paint !important;
+    /* Additional viewport height fixes for mobile */
+    /* Use dynamic viewport height for better mobile support */
+    height: 100dvh !important;
+    /* Ensure footer doesn't exceed viewport */
+    max-height: 100dvh !important;
+    /* Force footer to stay within safe area */
+    bottom: env(safe-area-inset-bottom) !important;
+    /* Additional critical fixes for mobile visibility */
+    /* Ensure footer is always above the fold */
+    top: auto !important;
+    /* Prevent any viewport overflow */
+    max-height: calc(100dvh - env(safe-area-inset-top)) !important;
+    /* Force proper bottom positioning */
+    bottom: max(0px, env(safe-area-inset-bottom)) !important;
+    /* Ensure no negative positioning */
+    transform: translateY(0) !important;
+    /* Force hardware acceleration for better rendering */
+    will-change: transform, opacity !important;
+    /* Additional mobile-specific fixes */
+    /* Ensure footer is always within the visible viewport */
+    bottom: max(0px, env(safe-area-inset-bottom)) !important;
+    /* Prevent any potential overflow issues */
+    overflow: visible !important;
+    /* Force proper rendering */
+    contain: none !important;
+    /* Ensure footer is always on top */
+    z-index: 99999 !important;
+    /* Additional critical mobile fixes */
+    /* Force footer to stay within safe area bounds */
+    bottom: max(0px, env(safe-area-inset-bottom)) !important;
+    /* Prevent any potential clipping */
+    clip-path: none !important;
+    /* Ensure proper viewport positioning */
+    /* Force footer to be visible at all zoom levels */
+    transform: translateZ(0) scale(1) !important;
+    /* Additional safe area handling */
+    bottom: env(safe-area-inset-bottom) !important;
+    /* Ensure footer doesn't get pushed below viewport */
+    max-height: calc(100dvh - env(safe-area-inset-top)) !important;
   }
   
   .cart-summary {
@@ -114,11 +211,60 @@
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     width: 100% !important;
+    max-width: 480px !important; /* Limit max width for better visibility */
+    margin: 0 auto !important; /* Center horizontally */
     border: none;
     background: linear-gradient(135deg, #48bb78, #38a169) !important;
     color: white !important;
     cursor: pointer;
     transition: all 0.3s ease;
+    /* Ensure button is always visible */
+    position: relative !important;
+    z-index: 10002 !important; /* Highest z-index */
+    display: block !important;
+    /* Prevent any layout issues */
+    transform: translateZ(0) !important;
+    will-change: transform !important;
+    /* Enhanced visibility on mobile */
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    font-weight: 800 !important;
+    /* Ensure button stands out */
+    border: 2px solid #48bb78 !important;
+    /* Better mobile touch feedback */
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    /* Force visibility and prevent clipping */
+    visibility: visible !important;
+    opacity: 1 !important;
+    /* Ensure proper stacking */
+    isolation: isolate !important;
+    /* Prevent any overflow issues */
+    overflow: visible !important;
+    /* Ensure button is within viewport */
+    max-height: 80px !important;
+    /* Additional mobile visibility fixes */
+    /* Force button to stay within safe area */
+    bottom: 0 !important;
+    /* Prevent any potential clipping */
+    clip-path: none !important;
+    /* Ensure button is always on top */
+    z-index: 10002 !important;
+    /* Force proper rendering */
+    contain: none !important;
+    /* Additional safe area handling */
+    margin-bottom: env(safe-area-inset-bottom) !important;
+    /* Force button to be visible at all zoom levels */
+    transform: translateZ(0) scale(1) !important;
+    /* Ensure button doesn't get pushed below viewport */
+    position: relative !important;
+    /* Additional critical fixes for mobile visibility */
+    /* Force button to stay within viewport bounds */
+    max-height: calc(100dvh - env(safe-area-inset-top)) !important;
+    /* Prevent any potential overflow */
+    overflow: visible !important;
+    /* Force hardware acceleration for better rendering */
+    will-change: transform, opacity !important;
   }
 }
 
