@@ -126,17 +126,8 @@ export const verifyPayment = async (paymentData) => {
     }
   }
 
-  // Simulate random verification failures for testing (10% chance)
-  const shouldFail = Math.random() < 0.1 // 10% chance of failure
-  if (shouldFail) {
-    console.warn('⚠️ Payment verification failed: Simulated verification error')
-    return {
-      success: false,
-      error: 'Payment verification failed',
-      orderId: paymentData.razorpay_order_id,
-      paymentId: paymentData.razorpay_payment_id
-    }
-  }
+  // Remove random verification failures for production stability
+  // In production, implement proper signature verification on backend
 
   // For demo, return success with proper validation
   // In production, verify the payment signature on backend
