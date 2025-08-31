@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useCart } from './CartContext'
 import { useAuth } from './AuthContext'
-import { useTokenContext } from './TokenContext'
+import { useToken } from './TokenContext'
 import { razorpayConfig, getRazorpayKey, verifyPayment, isDevelopmentMode, mockPayment } from './razorpayConfig'
 import { printerService } from './PrinterService'
 import PaymentSuccess from './PaymentSuccess'
@@ -12,7 +12,7 @@ import './Checkout.css'
 function Checkout({ isOpen, onClose, onOrderSuccess }) {
   const { cartItems, getTotalPrice, clearCart } = useCart()
   const { currentUser } = useAuth()
-  const { setNewOrder, addShopToken } = useTokenContext()
+  const { setNewOrder, addShopToken } = useToken()
   const [isProcessing, setIsProcessing] = useState(false)
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false)
   const [completedOrder, setCompletedOrder] = useState(null)
