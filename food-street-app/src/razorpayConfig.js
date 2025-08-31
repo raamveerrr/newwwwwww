@@ -1,11 +1,11 @@
 // Razorpay Configuration
 export const razorpayConfig = {
-  // Test Key - Replace with your actual Razorpay key
-  keyId: 'rzp_test_1234567890', // Replace with your test key
+  // Get key from environment variables
+  keyId: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_1234567890', // Fallback for development
   currency: 'INR',
-  name: 'Food Street',
+  name: 'Digital Food Street',
   description: 'College Food Street Pre-Order',
-  image: '🍕', // You can replace with actual logo URL
+  image: 'https://via.placeholder.com/200x200/667eea/ffffff?text=FS', // Placeholder logo
   theme: {
     color: '#667eea'
   },
@@ -13,12 +13,43 @@ export const razorpayConfig = {
     ondismiss: function() {
       console.log('Payment cancelled by user')
     }
-  }
+  },
+  // Development mode flag
+  isDevelopment: true
 }
 
 // For production, use environment variables
 export const getRazorpayKey = () => {
-  return import.meta.env.VITE_RAZORPAY_KEY_ID || razorpayConfig.keyId
+  const key = import.meta.env.VITE_RAZORPAY_KEY_ID || razorpayConfig.keyId
+  console.log('🔑 Using Razorpay Key:', key ? `${key.substring(0, 12)}...` : 'No key found')
+  return key
+}
+
+// Check if we're in development mode with invalid keys
+export const isDevelopmentMode = () => {
+  const key = getRazorpayKey()
+  return !key || key === 'rzp_test_1234567890' || key.includes('YOUR_NEW_VALID_KEY_HERE')
+}
+
+// Mock payment for development
+export const mockPayment = (amount, onSuccess, onError) => {
+  return new Promise((resolve) => {
+    // Simulate payment processing delay
+    setTimeout(() => {
+      const timestamp = Date.now()
+      const randomId = Math.random().toString(36).substr(2, 9)
+      
+      const mockResponse = {
+        razorpay_payment_id: `pay_mock_${timestamp}_${randomId}`,
+        razorpay_order_id: `order_mock_${timestamp}_${randomId}`,
+        razorpay_signature: `mock_signature_${randomId}_${timestamp}`
+      }
+      
+      console.log('🧪 Mock payment completed:', mockResponse)
+      onSuccess(mockResponse)
+      resolve(mockResponse)
+    }, 2000) // 2 second delay to simulate processing
+  })
 }
 
 // Mock payment verification (in production, this should be done on backend)

@@ -1,0 +1,487 @@
+/* Token Display Styles */
+.token-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.token-container {
+  background: white;
+  border-radius: 20px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: tokenSlideUp 0.4s ease-out;
+}
+
+@keyframes tokenSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Success Header */
+.success-header {
+  text-align: center;
+  padding: 30px 20px 20px;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  border-radius: 20px 20px 0 0;
+}
+
+.success-icon {
+  font-size: 4rem;
+  margin-bottom: 10px;
+  animation: bounce 1s ease-in-out;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-15px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+}
+
+.success-header h2 {
+  margin: 0 0 10px;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.success-header p {
+  margin: 0;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+/* Token Display */
+.token-display {
+  text-align: center;
+  padding: 30px 20px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  position: relative;
+}
+
+.token-label {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  opacity: 0.9;
+}
+
+.token-number {
+  font-size: 2.5rem;
+  font-weight: 900;
+  font-family: 'Courier New', monospace;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 20px;
+  border-radius: 15px;
+  border: 3px dashed rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  letter-spacing: 2px;
+}
+
+.token-number:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.token-number:active {
+  transform: scale(0.98);
+}
+
+.copied-indicator {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #4CAF50;
+  color: white;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  animation: copyAlert 2s ease-out;
+}
+
+@keyframes copyAlert {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  20% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  80% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+}
+
+.token-hint {
+  font-size: 0.85rem;
+  margin-top: 15px;
+  opacity: 0.8;
+  font-style: italic;
+}
+
+/* Order Summary */
+.order-summary-token {
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.order-summary-token h3 {
+  margin: 0 0 15px;
+  color: #333;
+  font-size: 1.3rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 0.95rem;
+}
+
+.summary-row:not(:last-child) {
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.summary-row span:first-child {
+  color: #666;
+  font-weight: 500;
+}
+
+.summary-row span:last-child {
+  font-weight: 600;
+  color: #333;
+}
+
+.status-paid {
+  color: #4CAF50 !important;
+  font-weight: 700 !important;
+}
+
+/* Pickup Information */
+.pickup-info {
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.pickup-info h3 {
+  margin: 0 0 15px;
+  color: #333;
+  font-size: 1.3rem;
+}
+
+.pickup-location {
+  background: #f8f9ff;
+  border: 2px solid #e3e8ff;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 10px;
+}
+
+.pickup-location:last-child {
+  margin-bottom: 0;
+}
+
+.location-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.shop-name {
+  font-weight: 700;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.item-count {
+  background: #667eea;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.timing-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.estimated-time {
+  color: #FF6B35;
+  font-weight: 600;
+}
+
+.ready-time {
+  color: #666;
+  font-weight: 500;
+}
+
+/* Instructions */
+.pickup-instructions {
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.pickup-instructions h3 {
+  margin: 0 0 20px;
+  color: #333;
+  font-size: 1.3rem;
+}
+
+.instruction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.instruction-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.step-number {
+  background: #667eea;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-content strong {
+  display: block;
+  color: #333;
+  margin-bottom: 5px;
+  font-size: 1rem;
+}
+
+.step-content p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Important Notes */
+.important-notes {
+  padding: 20px;
+  background: #fff3cd;
+  border-top: 3px solid #ffc107;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.important-notes h4 {
+  margin: 0 0 15px;
+  color: #856404;
+  font-size: 1.1rem;
+}
+
+.important-notes ul {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.important-notes li {
+  margin-bottom: 8px;
+  color: #856404;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.important-notes li:last-child {
+  margin-bottom: 0;
+}
+
+/* Action Buttons */
+.token-actions {
+  padding: 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.token-actions button {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.copy-token-btn {
+  background: #17a2b8;
+  color: white;
+}
+
+.copy-token-btn:hover {
+  background: #138496;
+  transform: translateY(-2px);
+}
+
+.share-btn {
+  background: #6f42c1;
+  color: white;
+}
+
+.share-btn:hover {
+  background: #5a32a0;
+  transform: translateY(-2px);
+}
+
+.done-btn {
+  background: #28a745;
+  color: white;
+}
+
+.done-btn:hover {
+  background: #218838;
+  transform: translateY(-2px);
+}
+
+/* Support Contact */
+.support-contact {
+  text-align: center;
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-radius: 0 0 20px 20px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.support-contact strong {
+  color: #333;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .token-overlay {
+    padding: 10px;
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+
+  .token-container {
+    border-radius: 15px;
+    max-height: 95vh;
+  }
+
+  .success-header {
+    padding: 20px 15px 15px;
+    border-radius: 15px 15px 0 0;
+  }
+
+  .success-icon {
+    font-size: 3rem;
+  }
+
+  .success-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .token-display {
+    padding: 20px 15px;
+  }
+
+  .token-number {
+    font-size: 2rem;
+    padding: 15px;
+  }
+
+  .pickup-info,
+  .pickup-instructions,
+  .order-summary-token {
+    padding: 15px;
+  }
+
+  .timing-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .token-actions {
+    padding: 15px;
+    flex-direction: column;
+  }
+
+  .token-actions button {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .token-number {
+    font-size: 1.8rem;
+    letter-spacing: 1px;
+  }
+
+  .location-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .instruction-item {
+    gap: 10px;
+  }
+
+  .step-number {
+    width: 25px;
+    height: 25px;
+    font-size: 0.8rem;
+  }
+}

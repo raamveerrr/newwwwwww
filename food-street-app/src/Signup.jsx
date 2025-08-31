@@ -3,33 +3,19 @@ import { useAuth } from './AuthContext'
 import './Auth.css'
 
 function Signup({ onSwitchToLogin, onClose }) {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  })
   const [userType, setUserType] = useState('') // 'student' or 'admin'
   const [selectedShop, setSelectedShop] = useState('') // For admin users
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
-  const { signup, signupWithGoogle, validateEmail } = useAuth()
-
-  const [emailValidation, setEmailValidation] = useState({
-    isValid: true,
-    message: ''
-  })
-
-  const [passwordValidation, setPasswordValidation] = useState({
-    isValid: true,
-    message: ''
-  })
+  const { signInWithGoogle } = useAuth()
 
   // Prevent background scrolling when modal is open
   useEffect(() => {
+    // Prevent background scrolling
     document.body.style.overflow = 'hidden'
+    
     return () => {
+      // Restore original settings
       document.body.style.overflow = 'unset'
     }
   }, [])
@@ -41,96 +27,15 @@ function Signup({ onSwitchToLogin, onClose }) {
     { id: 'shakers', name: 'Shakers and Movers', emoji: '🥤' }
   ]
 
-  function handleChange(e) {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
-    
-    // Real-time email validation
-    if (e.target.name === 'email') {
-      const email = e.target.value
-      if (email) {
-        if (validateEmail(email)) {
-          setEmailValidation({ isValid: true, message: '' })
-        } else {
-          setEmailValidation({ 
-            isValid: false, 
-            message: 'Please enter a valid email address'
-          })
-        }
-      } else {
-        setEmailValidation({ isValid: true, message: '' })
-      }
-    }
-    
-    // Real-time password validation
-    if (e.target.name === 'password') {
-      const password = e.target.value
-      if (password) {
-        if (password.length >= 6) {
-          setPasswordValidation({ isValid: true, message: '' })
-        } else {
-          setPasswordValidation({ 
-            isValid: false, 
-            message: 'Password must be at least 6 characters'
-          })
-        }
-      } else {
-        setPasswordValidation({ isValid: true, message: '' })
-      }
-    }
-  }
 
-  async function handleSubmit(e) {
-    e.preventDefault()
-
-    if (!userType) {
-      return setError('Please select user type (Student or Admin)')
-    }
-
-    if (userType === 'admin' && !selectedShop) {
-      return setError('Please select your shop')
-    }
-
-    // Validate email format
-    if (!validateEmail(formData.email)) {
-      return setError('Please enter a valid email address')
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      return setError('Passwords do not match')
-    }
-
-    if (formData.password.length < 6) {
-      return setError('Password must be at least 6 characters')
-    }
-
-    try {
-      setError('')
-      setLoading(true)
-      
-      const userData = {
-        userType,
-        shopId: userType === 'admin' ? selectedShop : null
-      }
-      
-      await signup(formData.email, formData.password, formData.name, userData)
-      onClose()
-    } catch (error) {
-      setError('Failed to create an account: ' + error.message)
-    }
-
-    setLoading(false)
-  }
 
   async function handleGoogleSignup() {
     if (!userType) {
-      return setError('Please select user type (Student or Admin) before continuing with Google')
+      return setError('Please select user type (Student or Admin) before continuing')
     }
 
     if (userType === 'admin' && !selectedShop) {
-      return setError('Please select your shop before continuing with Google')
+      return setError('Please select your shop before continuing')
     }
 
     try {
@@ -142,27 +47,39 @@ function Signup({ onSwitchToLogin, onClose }) {
         shopId: userType === 'admin' ? selectedShop : null
       }
       
-      await signupWithGoogle(userData)
+      await signInWithGoogle(userData)
       onClose()
     } catch (error) {
-      setError('Google signup failed: ' + error.message)
+      setError('Authentication failed: ' + error.message)
     }
 
     setGoogleLoading(false)
   }
 
   return (
-    <div className="auth-overlay">
-      <div className="auth-modal">
+    <div className="auth-overlay" onClick={onClose}>
+      <div 
+        ref={swipeRef}
+        className="auth-modal"
+        onClick={e => {
+          e.stopPropagation()
+          // Prevent any unwanted touch events
+          e.preventDefault()
+        }}
+        onTouchStart={e => {
+          // Allow scrolling within modal
+          e.stopPropagation()
+        }}
+      >
         <div className="auth-header">
           <h2>Join Food Street!</h2>
-          <p>Create your account to start ordering</p>
+          <p>Create your account with Google to start ordering</p>
           <button className="auth-close" onClick={onClose}>×</button>
         </div>
 
         {error && <div className="auth-error">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        <div className="auth-form">
           <div className="form-group">
             <label>I am a:</label>
             <div className="user-type-selection">
@@ -204,92 +121,22 @@ function Signup({ onSwitchToLogin, onClose }) {
             </div>
           )}
 
-          <div className="form-group">
-            <label htmlFor="name">Full Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              placeholder="Enter your full name"
-              className="form-input"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="email">{userType === 'admin' ? 'Admin Email' : 'College Email'}</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              placeholder={userType === 'admin' ? 'admin@yourshop.com' : 'your.name@college.edu'}
-              className={`form-input ${formData.email && !emailValidation.isValid ? 'invalid' : ''} ${formData.email && emailValidation.isValid ? 'valid' : ''}`}
-            />
-            {formData.email && !emailValidation.isValid && (
-              <span className="validation-message error">{emailValidation.message}</span>
-            )}
-            {formData.email && emailValidation.isValid && (
-              <span className="validation-message success">✓ Valid email address</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              placeholder="Create a secure password"
-              className={`form-input ${formData.password && !passwordValidation.isValid ? 'invalid' : ''} ${formData.password && passwordValidation.isValid && formData.password.length >= 6 ? 'valid' : ''}`}
-            />
-            {formData.password && !passwordValidation.isValid && (
-              <span className="validation-message error">{passwordValidation.message}</span>
-            )}
-            {formData.password && passwordValidation.isValid && formData.password.length >= 6 && (
-              <span className="validation-message success">✓ Password strength: Good</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-              placeholder="Confirm your password"
-              className="form-input"
-            />
-          </div>
-
-          <button disabled={loading} type="submit" className="auth-button">
-            {loading ? 'Creating Account...' : 'Create Account'}
-          </button>
-          
-          <div className="auth-divider">
-            <span>or</span>
-          </div>
-          
           <button 
             type="button" 
-            className="google-auth-button" 
+            className="google-auth-button primary" 
             onClick={handleGoogleSignup}
-            disabled={googleLoading || loading}
+            disabled={googleLoading || !userType || (userType === 'admin' && !selectedShop)}
           >
             <span className="google-icon">🔍</span>
-            {googleLoading ? 'Signing up with Google...' : 'Sign up with Google'}
+            {googleLoading ? 'Creating account...' : 'Sign up with Google'}
           </button>
-        </form>
+          
+          <div className="auth-note">
+            <p>🔒 Secure authentication powered by Google</p>
+            <p>We only use Google accounts for enhanced security</p>
+            <p>✨ Your Google profile info will be used to create your account</p>
+          </div>
+        </div>
 
         <div className="auth-footer">
           <p>

@@ -11,6 +11,7 @@ function Cart() {
     cartItems, 
     isCartOpen, 
     toggleCart, 
+    setIsCartOpen,
     updateQuantity, 
     removeFromCart, 
     getTotalPrice, 
@@ -47,7 +48,10 @@ function Cart() {
 
   return (
     <div className="cart-overlay" onClick={toggleCart}>
-      <div className="cart-container" onClick={e => e.stopPropagation()}>
+      <div 
+        className="cart-container" 
+        onClick={e => e.stopPropagation()}
+      >
         <div className="cart-header">
           <h2>Your Cart</h2>
           <button className="close-cart-btn" onClick={toggleCart}>
@@ -68,41 +72,7 @@ function Cart() {
           ) : (
             <>
               <div className="cart-items">
-                {cartItems.map(item => (
-                  <div key={item.id} className="cart-item">
-                    <div className="item-info">
-                      <span className="item-emoji">{item.image}</span>
-                      <div className="item-details">
-                        <h4 className="item-name">{item.name}</h4>
-                        <p className="item-shop">from {item.shopName}</p>
-                        <p className="item-price">₹{item.price}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="quantity-controls">
-                      <button 
-                        className="quantity-btn"
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      >
-                        -
-                      </button>
-                      <span className="quantity">{item.quantity}</span>
-                      <button 
-                        className="quantity-btn"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      >
-                        +
-                      </button>
-                    </div>
-                    
-                    <button 
-                      className="remove-item-btn"
-                      onClick={() => removeFromCart(item.id)}
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                ))}
+                {cartItems.map(item => <CartItem key={item.id} item={item} updateQuantity={updateQuantity} removeFromCart={removeFromCart} />)}
               </div>
 
               <div className="cart-footer">
@@ -135,6 +105,45 @@ function Cart() {
         onClose={() => setShowOrderSuccess(false)}
         orderData={orderData}
       />
+    </div>
+  )
+}
+
+// Simple Cart Item Component
+function CartItem({ item, updateQuantity, removeFromCart }) {
+  return (
+    <div className="cart-item">
+      <div className="item-info">
+        <span className="item-emoji">{item.image}</span>
+        <div className="item-details">
+          <h4 className="item-name">{item.name}</h4>
+          <p className="item-shop">from {item.shopName}</p>
+          <p className="item-price">₹{item.price}</p>
+        </div>
+      </div>
+      
+      <div className="quantity-controls">
+        <button 
+          className="quantity-btn"
+          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+        >
+          -
+        </button>
+        <span className="quantity">{item.quantity}</span>
+        <button 
+          className="quantity-btn"
+          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+        >
+          +
+        </button>
+      </div>
+      
+      <button 
+        className="remove-item-btn"
+        onClick={() => removeFromCart(item.id)}
+      >
+        🗑️
+      </button>
     </div>
   )
 }

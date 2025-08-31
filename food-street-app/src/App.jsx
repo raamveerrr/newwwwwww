@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom'
 import { AuthProvider, useAuth } from './AuthContext'
 import { CartProvider } from './CartContext'
+import { TokenProvider } from './TokenContext'
+import ErrorBoundary from './ErrorBoundary'
 import Login from './Login'
 import Signup from './Signup'
 import LogoutDialog from './LogoutDialog'
@@ -12,6 +14,13 @@ import ShakersMenu from './ShakersMenu'
 import Orders from './Orders'
 import Admin from './Admin'
 import Cart from './Cart'
+import MobileNavigation from './MobileNavigation'
+// Policy Pages
+import PrivacyPolicy from './PrivacyPolicy'
+import TermsAndConditions from './TermsAndConditions'
+import CancellationRefunds from './CancellationRefunds'
+import ShippingPolicy from './ShippingPolicy'
+import ContactUs from './ContactUs'
 import './App.css'
 
 // Protected Route Component
@@ -188,7 +197,7 @@ function LandingPage() {
             </div>
             <div className="stat">
               <span className="stat-icon">⏰</span>
-              <span>Fast Delivery</span>
+              <span>Quick Pickup</span>
             </div>
             <div className="stat">
               <span className="stat-icon">⭐</span>
@@ -239,6 +248,40 @@ function LandingPage() {
         </div>
       </main>
       
+      {/* Footer with Policy Links */}
+      <footer className="app-footer">
+        <div className="footer-content">
+          <div className="footer-section">
+            <h3>College Food Street</h3>
+            <p>Your campus food ordering solution</p>
+          </div>
+          
+          <div className="footer-section">
+            <h4>Policies</h4>
+            <div className="footer-links">
+              <Link to="/privacy-policy">Privacy Policy</Link>
+              <Link to="/terms-and-conditions">Terms & Conditions</Link>
+              <Link to="/cancellation-refunds">Cancellation & Refunds</Link>
+              <Link to="/shipping-policy">Pickup Policy</Link>
+              <Link to="/contact-us">Contact Us</Link>
+            </div>
+          </div>
+          
+          <div className="footer-section">
+            <h4>Support</h4>
+            <div className="footer-links">
+              <a href="mailto:veerramjat333@gmail.com">Email Support</a>
+              <a href="tel:+918306461994">Call Support</a>
+              <a href="https://wa.me/918306461994">WhatsApp Support</a>
+            </div>
+          </div>
+        </div>
+        
+        <div className="footer-bottom">
+          <p>&copy; 2024 Digital Food Street. All rights reserved.</p>
+        </div>
+      </footer>
+      
       {/* Floating Animation Elements */}
       <div className="floating-elements">
         <div className="floating-element" style={{left: '10%', top: '20%'}}>🍕</div>
@@ -261,50 +304,61 @@ function LandingPage() {
 
 function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <Router>
-          <Routes>
-            <Route path="/" element={
-              <ProtectedRoute>
-                <LandingPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/menu/zuzu" element={
-              <ProtectedRoute>
-                <ZuzuMenu />
-              </ProtectedRoute>
-            } />
-            <Route path="/menu/oasis" element={
-              <ProtectedRoute>
-                <OasisMenu />
-              </ProtectedRoute>
-            } />
-            <Route path="/menu/bites" element={
-              <ProtectedRoute>
-                <BitesMenu />
-              </ProtectedRoute>
-            } />
-            <Route path="/menu/shakers" element={
-              <ProtectedRoute>
-                <ShakersMenu />
-              </ProtectedRoute>
-            } />
-            <Route path="/orders" element={
-              <ProtectedRoute>
-                <Orders />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin" element={
-              <ProtectedRoute>
-                <Admin />
-              </ProtectedRoute>
-            } />
-          </Routes>
-          <Cart />
-        </Router>
+    <ErrorBoundary>
+      <AuthProvider>
+        <CartProvider>
+          <TokenProvider>
+            <Router>
+            <Routes>
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <LandingPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/menu/zuzu" element={
+                <ProtectedRoute>
+                  <ZuzuMenu />
+                </ProtectedRoute>
+              } />
+              <Route path="/menu/oasis" element={
+                <ProtectedRoute>
+                  <OasisMenu />
+                </ProtectedRoute>
+              } />
+              <Route path="/menu/bites" element={
+                <ProtectedRoute>
+                  <BitesMenu />
+                </ProtectedRoute>
+              } />
+              <Route path="/menu/shakers" element={
+                <ProtectedRoute>
+                  <ShakersMenu />
+                </ProtectedRoute>
+              } />
+              <Route path="/orders" element={
+                <ProtectedRoute>
+                  <Orders />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin" element={
+                <ProtectedRoute>
+                  <Admin />
+                </ProtectedRoute>
+              } />
+              {/* Policy Pages - Accessible without authentication for Razorpay verification */}
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+              <Route path="/cancellation-refunds" element={<CancellationRefunds />} />
+              <Route path="/shipping-policy" element={<ShippingPolicy />} />
+              <Route path="/contact-us" element={<ContactUs />} />
+            </Routes>
+            <Cart />
+            <MobileNavigation />
+          </Router>
+        </TokenProvider>
       </CartProvider>
     </AuthProvider>
+    </ErrorBoundary>
   )
 }
 

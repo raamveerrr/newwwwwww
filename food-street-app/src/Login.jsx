@@ -3,24 +3,19 @@ import { useAuth } from './AuthContext'
 import './Auth.css'
 
 function Login({ onSwitchToSignup, onClose }) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [userType, setUserType] = useState('') // 'student' or 'admin'
   const [selectedShop, setSelectedShop] = useState('') // For admin users
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
-  const { login, signupWithGoogle, validateEmail } = useAuth()
-
-  const [emailValidation, setEmailValidation] = useState({
-    isValid: true,
-    message: ''
-  })
+  const { signInWithGoogle } = useAuth()
 
   // Prevent background scrolling when modal is open
   useEffect(() => {
+    // Prevent background scrolling
     document.body.style.overflow = 'hidden'
+    
     return () => {
+      // Restore original settings
       document.body.style.overflow = 'unset'
     }
   }, [])
@@ -32,53 +27,13 @@ function Login({ onSwitchToSignup, onClose }) {
     { id: 'shakers', name: 'Shakers and Movers', emoji: '🥤' }
   ]
 
-  async function handleSubmit(e) {
-    e.preventDefault()
-
-    if (!userType) {
-      setError('Please select user type (Student or Admin)')
-      return
-    }
-
-    if (userType === 'admin' && !selectedShop) {
-      setError('Please select your shop')
-      return
-    }
-
-    // Validate email format
-    if (!validateEmail(email)) {
-      setError('Please enter a valid email address')
-      return
-    }
-
-    try {
-      setError('')
-      setLoading(true)
-      
-      // Add user type and shop info to login
-      const userData = {
-        email,
-        password,
-        userType,
-        shopId: userType === 'admin' ? selectedShop : null
-      }
-      
-      await login(email, password, userData)
-      onClose()
-    } catch (error) {
-      setError('Failed to log in: ' + error.message)
-    }
-
-    setLoading(false)
-  }
-
   async function handleGoogleLogin() {
     if (!userType) {
-      return setError('Please select user type (Student or Admin) before continuing with Google')
+      return setError('Please select user type (Student or Admin) before continuing')
     }
 
     if (userType === 'admin' && !selectedShop) {
-      return setError('Please select your shop before continuing with Google')
+      return setError('Please select your shop before continuing')
     }
 
     try {
@@ -90,27 +45,44 @@ function Login({ onSwitchToSignup, onClose }) {
         shopId: userType === 'admin' ? selectedShop : null
       }
       
-      await signupWithGoogle(userData)
+      console.log('🔐 Starting Google authentication...')
+      await signInWithGoogle(userData)
+      
+      // Only close if we get here (popup succeeded)
       onClose()
     } catch (error) {
-      setError('Google login failed: ' + error.message)
+      console.error('❌ Authentication failed:', error)
+      
+      // Handle specific error cases
+      if (error.code === 'auth/popup-closed-by-user') {
+        setError('Sign-in was cancelled. Please try again or use a different browser if popups are blocked.')
+      } else if (error.code === 'auth/popup-blocked') {
+        setError('Popup was blocked by your browser. Please allow popups for this site or try a different browser.')
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        setError('Multiple sign-in attempts detected. Please wait a moment and try again.')
+      } else {
+        setError('Authentication failed: ' + (error.message || 'Unknown error occurred'))
+      }
+    } finally {
+      setGoogleLoading(false)
     }
-
-    setGoogleLoading(false)
   }
 
   return (
-    <div className="auth-overlay">
-      <div className="auth-modal">
+    <div className="auth-overlay" onClick={onClose}>
+      <div 
+        className="auth-modal"
+        onClick={e => e.stopPropagation()}
+      >
         <div className="auth-header">
-          <h2>Welcome Back!</h2>
-          <p>Sign in to your account</p>
+          <h2>Welcome to Food Street!</h2>
+          <p>Sign in with your Google account to continue</p>
           <button className="auth-close" onClick={onClose}>×</button>
         </div>
 
         {error && <div className="auth-error">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        <div className="auth-form">
           <div className="form-group">
             <label>I am a:</label>
             <div className="user-type-selection">
@@ -151,78 +123,28 @@ function Login({ onSwitchToSignup, onClose }) {
               </div>
             </div>
           )}
-
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value)
-                // Real-time email validation
-                if (e.target.value) {
-                  if (validateEmail(e.target.value)) {
-                    setEmailValidation({ isValid: true, message: '' })
-                  } else {
-                    setEmailValidation({ 
-                      isValid: false, 
-                      message: 'Please enter a valid email address'
-                    })
-                  }
-                } else {
-                  setEmailValidation({ isValid: true, message: '' })
-                }
-              }}
-              required
-              placeholder={userType === 'admin' ? 'Enter your admin email' : 'Enter your college email'}
-              className={`form-input ${email && !emailValidation.isValid ? 'invalid' : ''} ${email && emailValidation.isValid ? 'valid' : ''}`}
-            />
-            {email && !emailValidation.isValid && (
-              <span className="validation-message error">{emailValidation.message}</span>
-            )}
-            {email && emailValidation.isValid && (
-              <span className="validation-message success">✓ Valid email address</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="Enter your password"
-              className="form-input"
-            />
-          </div>
-
-          <button disabled={loading} type="submit" className="auth-button">
-            {loading ? 'Signing In...' : 'Sign In'}
-          </button>
-          
-          <div className="auth-divider">
-            <span>or</span>
-          </div>
           
           <button 
             type="button" 
-            className="google-auth-button" 
+            className="google-auth-button primary" 
             onClick={handleGoogleLogin}
-            disabled={googleLoading || loading}
+            disabled={googleLoading || !userType || (userType === 'admin' && !selectedShop)}
           >
             <span className="google-icon">🔍</span>
-            {googleLoading ? 'Signing in with Google...' : 'Sign in with Google'}
+            {googleLoading ? 'Signing in...' : 'Continue with Google'}
           </button>
-        </form>
+          
+          <div className="auth-note">
+            <p>🔒 Secure authentication powered by Google</p>
+            <p>We only use Google accounts for enhanced security</p>
+          </div>
+        </div>
 
         <div className="auth-footer">
           <p>
-            Don't have an account?{' '}
+            New to Food Street?{' '}
             <button className="auth-link" onClick={onSwitchToSignup}>
-              Sign up here
+              Create account
             </button>
           </p>
         </div>

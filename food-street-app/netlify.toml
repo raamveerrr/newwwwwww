@@ -1,0 +1,39 @@
+[build]
+  # Build command (make sure this matches your package.json)
+  command = "npm run build"
+  # Publish directory (where build outputs files)
+  publish = "dist"
+
+[[redirects]]
+  # Redirect all routes to index.html for React Router
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[build.environment]
+  # Node version (optional - Netlify auto-detects)
+  NODE_VERSION = "18"
+
+# Performance Headers (without restrictive CSP)
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+
+# Basic security headers (without CSP that blocks Razorpay)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"

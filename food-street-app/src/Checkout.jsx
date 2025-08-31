@@ -1,7 +1,10 @@
 import React, { useState } from 'react'
 import { useCart } from './CartContext'
 import { useAuth } from './AuthContext'
-import { razorpayConfig, getRazorpayKey, verifyPayment } from './razorpayConfig'
+import { useToken } from './TokenContext'
+import { razorpayConfig, getRazorpayKey, verifyPayment, isDevelopmentMode, mockPayment } from './razorpayConfig'
+import { printerService } from './PrinterService'
+import PaymentSuccess from './PaymentSuccess'
 import { db } from './firebase'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import './Checkout.css'
@@ -9,7 +12,10 @@ import './Checkout.css'
 function Checkout({ isOpen, onClose, onOrderSuccess }) {
   const { cartItems, getTotalPrice, clearCart } = useCart()
   const { currentUser } = useAuth()
+  const { setNewOrder } = useToken()
   const [isProcessing, setIsProcessing] = useState(false)
+  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false)
+  const [completedOrder, setCompletedOrder] = useState(null)
   const [customerInfo, setCustomerInfo] = useState({
     name: currentUser?.displayName || '',
     email: currentUser?.email || '',
@@ -18,6 +24,17 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
   })
 
   if (!isOpen) return null
+
+  const handlePaymentSuccessClose = () => {
+    setShowPaymentSuccess(false)
+    setCompletedOrder(null)
+    onClose()
+  }
+
+  // Show payment success if order completed
+  if (showPaymentSuccess && completedOrder) {
+    return <PaymentSuccess orderData={completedOrder} isOpen={showPaymentSuccess} onClose={handlePaymentSuccessClose} />
+  }
 
   const handleInputChange = (e) => {
     setCustomerInfo({
@@ -28,14 +45,31 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
 
   const createOrderInFirestore = async (orderData) => {
     try {
-      const docRef = await addDoc(collection(db, 'orders'), {
+      // Validate and clean order data before saving
+      const cleanOrderData = {
         ...orderData,
+        // Ensure all required fields are present
+        userId: orderData.userId || currentUser?.uid,
+        paymentId: orderData.paymentId || 'mock_payment_id',
+        orderId: orderData.orderId || `order_${Date.now()}`,
+        signature: orderData.signature || 'mock_signature',
+        status: orderData.status || 'paid',
+        orderStatus: orderData.orderStatus || 'confirmed',
+        orderType: orderData.orderType || 'pickup'
+      }
+      
+      console.log('💾 Saving order to Firestore:', cleanOrderData)
+      
+      const docRef = await addDoc(collection(db, 'orders'), {
+        ...cleanOrderData,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       })
       
+      console.log('✅ Order saved successfully with ID:', docRef.id)
+      
       // Trigger automatic receipt printing for each shop
-      await triggerAutomaticReceipts(orderData)
+      await triggerAutomaticReceipts(cleanOrderData)
       
       return docRef.id
     } catch (error) {
@@ -52,6 +86,8 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
 
   const triggerAutomaticReceipts = async (orderData) => {
     try {
+      console.log('🖨️ Starting automatic receipt printing process...')
+      
       // Group items by shop for separate receipts
       const shopOrders = {}
       orderData.items.forEach(item => {
@@ -66,42 +102,55 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
         shopOrders[item.shopId].shopTotal += item.price * item.quantity
       })
 
-      // Send receipt to each shop's printer
+      // Send receipt to each shop's printer automatically
+      const printResults = []
       for (const [shopId, shopOrder] of Object.entries(shopOrders)) {
-        await sendReceiptToPrinter({
+        const shopOrderData = {
           ...orderData,
           shopId,
           shopName: shopOrder.shopName,
           items: shopOrder.items,
           shopTotal: shopOrder.shopTotal
-        })
+        }
+        
+        // Send to printer service
+        const printResult = await printerService.sendToPrinter(shopId, shopOrderData)
+        printResults.push({ shopId, shopName: shopOrder.shopName, ...printResult })
+        
+        if (printResult.success) {
+          console.log(`✅ Print successful for ${shopOrder.shopName}`)
+        } else {
+          console.warn(`⚠️ Print failed for ${shopOrder.shopName}:`, printResult.error)
+        }
       }
+      
+      // Show user notification about receipt printing
+      const successfulPrints = printResults.filter(r => r.success)
+      const failedPrints = printResults.filter(r => !r.success)
+      
+      if (successfulPrints.length > 0) {
+        const shopNames = successfulPrints.map(p => p.shopName).join(', ')
+        const isDev = successfulPrints.some(p => p.isDevelopment)
+        
+        setTimeout(() => {
+          alert(`✅ Receipt ${isDev ? 'simulated' : 'printed'} at: ${shopNames}\n\n🎫 Your Token: ${orderData.tokenNumber}\n\n📍 Please visit the shop(s) to collect your order!`)
+        }, 1500)
+      }
+      
+      if (failedPrints.length > 0) {
+        const failedShops = failedPrints.map(p => p.shopName).join(', ')
+        console.warn(`⚠️ Print failed for: ${failedShops} - shop owners will be notified`)
+      }
+      
+      return printResults
     } catch (error) {
-      console.error('Error sending receipts to printers:', error)
+      console.error('Error in automatic receipt printing:', error)
+      // Don't throw error - payment was successful, printing is secondary
+      return []
     }
   }
 
-  const sendReceiptToPrinter = async (orderData) => {
-    try {
-      // In production, this would call your backend API to trigger printer
-      // For now, we'll simulate the receipt printing
-      console.log(`🖨️ Auto-printing receipt for ${orderData.shopName}:`, orderData)
-      
-      // You would implement this API call:
-      // await fetch('/api/print-receipt', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(orderData)
-      // })
-      
-      // For demo, show alert
-      setTimeout(() => {
-        alert(`🖨️ Receipt auto-printed at ${orderData.shopName}!\nToken: ${orderData.tokenNumber}\nItems: ${orderData.items.length}\nTotal: ₹${orderData.shopTotal}`)
-      }, 2000)
-    } catch (error) {
-      console.error('Error printing receipt:', error)
-    }
-  }
+
 
   const handlePayment = async () => {
     if (!customerInfo.name || !customerInfo.phone) {
@@ -111,13 +160,99 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
 
     setIsProcessing(true)
 
+    // Check if we should use mock payment (development mode)
+    if (isDevelopmentMode()) {
+      console.log('🧪 Development mode detected - using mock payment')
+      
+      try {
+        await mockPayment(
+          getTotalPrice(),
+          async (response) => {
+            try {
+              console.log('📝 Mock payment response received:', response)
+              
+              // Validate response
+              if (!response || !response.razorpay_payment_id) {
+                throw new Error('Invalid payment response')
+              }
+              
+              // Handle successful mock payment
+              const verification = await verifyPayment(response)
+              
+              if (verification.success) {
+                const tokenNumber = generateTokenNumber()
+                
+                const orderData = {
+                  userId: currentUser.uid,
+                  customerInfo,
+                  items: cartItems,
+                  totalAmount: getTotalPrice(),
+                  paymentId: response.razorpay_payment_id,
+                  orderId: response.razorpay_order_id,
+                  signature: response.razorpay_signature,
+                  tokenNumber: tokenNumber,
+                  status: 'paid',
+                  orderStatus: 'confirmed',
+                  orderType: 'pickup',
+                  mockPayment: true // Flag for development
+                }
+
+                console.log('📝 Creating order with data:', orderData)
+                const firestoreOrderId = await createOrderInFirestore(orderData)
+                
+                const completedOrderData = {
+                  ...orderData,
+                  firestoreOrderId,
+                  orderNumber: `FS${Date.now()}`
+                }
+                
+                // Store order in token context for later access
+                setNewOrder(completedOrderData)
+                setCompletedOrder(completedOrderData)
+                clearCart()
+                onOrderSuccess(completedOrderData)
+                
+                // Show payment success dialog
+                setShowPaymentSuccess(true)
+              } else {
+                throw new Error('Payment verification failed')
+              }
+            } catch (paymentError) {
+              console.error('Payment processing error:', paymentError)
+              alert(`Payment failed: ${paymentError.message}`)
+            }
+          },
+          (error) => {
+            console.error('Mock payment error:', error)
+            alert('Payment failed. Please try again.')
+          }
+        )
+      } catch (error) {
+        console.error('Mock payment error:', error)
+        alert('Payment failed. Please try again.')
+      } finally {
+        setIsProcessing(false)
+      }
+      return
+    }
+
     try {
       // Load Razorpay script dynamically
       const script = document.createElement('script')
       script.src = 'https://checkout.razorpay.com/v1/checkout.js'
       script.onload = () => {
-        const options = {
-          key: getRazorpayKey(),
+        const razorpayKey = getRazorpayKey()
+        
+        if (!razorpayKey || razorpayKey === 'rzp_test_1234567890') {
+          alert('⚠️ Razorpay configuration error. Please check your API keys.')
+          setIsProcessing(false)
+          return
+        }
+
+        let options
+        try {
+          options = {
+            key: razorpayKey,
           amount: getTotalPrice() * 100, // Amount in paise
           currency: razorpayConfig.currency,
           name: razorpayConfig.name,
@@ -149,14 +284,23 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
 
                 const firestoreOrderId = await createOrderInFirestore(orderData)
                 
-                // Clear cart and show success
-                clearCart()
-                onOrderSuccess({
+                // Set completed order data for token display
+                const completedOrderData = {
                   ...orderData,
                   firestoreOrderId,
                   orderNumber: `FS${Date.now()}`
-                })
-                onClose()
+                }
+                
+                // Store order in token context for later access
+                setNewOrder(completedOrderData)
+                setCompletedOrder(completedOrderData)
+                
+                // Clear cart and show payment success
+                clearCart()
+                onOrderSuccess(completedOrderData)
+                
+                // Show payment success dialog
+                setShowPaymentSuccess(true)
               } else {
                 alert('Payment verification failed. Please contact support.')
               }
@@ -182,11 +326,28 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
               setIsProcessing(false)
             }
           }
+          }
+        } catch (configError) {
+          console.error('Razorpay configuration error:', configError)
+          alert('⚠️ Razorpay configuration error. Please check your setup.')
+          setIsProcessing(false)
+          return
         }
 
-        const rzp1 = new window.Razorpay(options)
-        rzp1.open()
-      }
+        try {
+          const rzp1 = new window.Razorpay(options)
+          rzp1.on('payment.failed', function (response) {
+            console.error('Payment failed:', response.error)
+            alert(`Payment failed: ${response.error.description}`)
+            setIsProcessing(false)
+          })
+          rzp1.open()
+        } catch (razorpayError) {
+          console.error('Razorpay initialization error:', razorpayError)
+          alert('Payment gateway initialization failed. Please check your connection and try again.')
+          setIsProcessing(false)
+        }
+      } // Close script.onload function
       
       script.onerror = () => {
         setIsProcessing(false)

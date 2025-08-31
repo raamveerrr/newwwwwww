@@ -8,8 +8,58 @@
 3. Click **Authentication** in left sidebar
 4. Click **Get Started**
 5. Go to **Sign-in method** tab
-6. Enable **Email/Password** provider
-7. Click **Save**
+6. Enable **Google** provider
+7. Configure OAuth consent screen if prompted
+8. Add your domain to **Authorized domains** (localhost is included by default)
+9. Click **Save**
+
+### 2. Download Config
+1. Go to Project Settings → General
+2. Scroll to "Your apps" → Web app
+3. Copy the config object
+4. Replace the config in `src/firebase.js`
+
+### 3. Test Setup
+```bash
+npm run dev
+```
+
+### 4. Replace Firebase Config
+Update `src/firebase.js` with your actual config:
+```javascript
+const firebaseConfig = {
+  apiKey: "your-api-key",
+  authDomain: "your-project.firebaseapp.com",
+  projectId: "your-project-id",
+  storageBucket: "your-project.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "your-app-id"
+}
+```
+
+### 5. Test Authentication
+1. Start your app: `npm run dev`
+2. Try to signup/login with Google
+3. Check Firebase Console > Authentication > Users
+
+## Current Status:
+- ✅ Firebase SDK installed
+- ✅ Auth components created  
+- ✅ Google-only authentication implemented
+- ✅ Email/password authentication removed for security
+
+## Security Benefits:
+- 🔒 No fake email accounts possible
+- 🛡️ Google's robust authentication system
+- ✅ OAuth 2.0 security standards
+- 🚫 No password management needed
+
+## Need Help?
+If you see authentication errors, check:
+1. Firebase config is correct
+2. Google provider is enabled in Console
+3. Domain is authorized (localhost should work by default)
+4. OAuth consent screen is configured
 
 ### 2. Get Firebase Config
 1. Go to **Project Settings** (gear icon)

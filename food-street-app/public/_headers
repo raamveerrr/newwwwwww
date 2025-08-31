@@ -1,0 +1,23 @@
+/* Performance & Caching Headers */
+/*
+  # Temporarily disabled CSP for Razorpay compatibility
+  # Content-Security-Policy: [disabled]
+
+# Static Assets Caching
+/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# JavaScript and CSS Caching  
+/*.js
+  Cache-Control: public, max-age=31536000
+
+/*.css
+  Cache-Control: public, max-age=31536000
+
+# HTML files
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Favicon
+/favicon.ico
+  Cache-Control: public, max-age=86400

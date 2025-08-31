@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useAuth } from './AuthContext'
 import { Navigate } from 'react-router-dom'
 import { db } from './firebase'
@@ -49,9 +49,9 @@ function Admin() {
     if (isAdmin && userShopId) {
       loadShopsAndItems()
     }
-  }, [isAdmin, userShopId])
+  }, [isAdmin, userShopId]) // Remove loadShopsAndItems from dependencies
 
-  const loadShopsAndItems = async () => {
+  const loadShopsAndItems = useCallback(async () => {
     try {
       setLoading(true)
       
@@ -85,7 +85,9 @@ function Admin() {
           setLoading(false)
         })
         
-        return unsubscribe
+        return () => {
+          unsubscribe()
+        }
       }
     } catch (error) {
       console.error('Error loading data:', error)
@@ -103,7 +105,7 @@ function Admin() {
       }
       setLoading(false)
     }
-  }
+  }, [userShopId]) // Add userShopId as dependency for useCallback
 
   const handleLogoutClick = () => {
     setShowLogoutDialog(true)
@@ -179,6 +181,8 @@ function Admin() {
       }
     }
   }
+
+
 
   if (!currentUser || !userProfile) {
     return (
@@ -367,6 +371,8 @@ function Admin() {
             </div>
           </div>
         )}
+
+
 
         {activeTab === 'orders' && (
           <div className="order-management">
