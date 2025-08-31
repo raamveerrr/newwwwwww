@@ -569,3 +569,58 @@ html, body {
     font-size: 0.75rem !important;
   }
 }
+
+/* EXTRA SMALL SCREENS - FORCE FULL VIEWPORT USAGE */
+@media (max-width: 360px) {
+  .checkout-overlay {
+    padding: 0;
+  }
+  
+  .checkout-container {
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  
+  .checkout-header {
+    padding: 15px 20px;
+    flex-shrink: 0;
+  }
+  
+  .checkout-content {
+    padding: 15px;
+    padding-bottom: 150px;
+  }
+  
+  .payment-section {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 15px 20px;
+    border-top: 2px solid #f1f5f9;
+    z-index: 1000;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .pay-now-btn {
+    position: relative;
+    z-index: 1001;
+    box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+  }
+}
+
+/* SAFE AREA SUPPORT FOR NOTCHED DEVICES */
+@supports (padding: max(0px)) {
+  .checkout-container {
+    /* Support for devices with notches */
+    padding-top: max(20px, env(safe-area-inset-top));
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+  
+  .payment-section {
+    /* Ensure payment section respects safe areas */
+    padding-bottom: max(15px, env(safe-area-inset-bottom));
+  }
+}
