@@ -1,3 +1,9 @@
+/* Force portrait orientation behavior */
+html, body {
+  /* Prevent landscape orientation issues on mobile */
+  overflow-x: hidden;
+}
+
 /* Checkout Component Styles */
 .checkout-overlay {
   position: fixed;
@@ -334,15 +340,232 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 480px) and (orientation: portrait) {
+  .checkout-overlay {
+    padding: 5px;
+  }
+  
+  .checkout-container {
+    max-height: 98vh;
+    border-radius: 15px;
+  }
+  
+  .checkout-header {
+    padding: 15px 20px;
+  }
+  
+  .checkout-header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .checkout-content {
+    padding: 15px;
+  }
+  
+  .order-summary {
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
   .order-item {
     flex-direction: column;
     align-items: flex-start;
     text-align: left;
+    padding: 10px 0;
   }
   
   .order-item .item-quantity,
   .order-item .item-total {
     align-self: flex-end;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group input,
+  .form-group textarea {
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
+  
+  .pickup-note {
+    padding: 15px;
+    margin-top: 15px;
+  }
+  
+  .pay-now-btn {
+    padding: 14px 20px;
+    font-size: 1rem;
+    border-radius: 12px;
+  }
+}
+
+/* Force Portrait Layout on Landscape Mobile Screens */
+@media (max-width: 968px) and (orientation: landscape) {
+  .checkout-overlay {
+    /* Center the checkout modal in landscape */
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+  }
+  
+  .checkout-container {
+    /* Modal-style checkout in landscape */
+    width: min(600px, 85vw);
+    height: min(500px, 90vh);
+    max-height: 90vh;
+    border-radius: 20px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .checkout-header {
+    padding: 15px 20px;
+    flex-shrink: 0;
+  }
+  
+  .checkout-header h2 {
+    font-size: 1.4rem;
+  }
+  
+  .checkout-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px 20px 20px;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .order-summary {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .order-item {
+    padding: 8px 0;
+    gap: 8px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group input,
+  .form-group textarea {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .pickup-note {
+    padding: 12px;
+    margin-top: 12px;
+  }
+  
+  .pickup-note li {
+    padding: 4px 0;
+    font-size: 0.85rem;
+  }
+  
+  .pay-now-btn {
+    padding: 12px 18px;
+    font-size: 1rem;
+    border-radius: 12px;
+  }
+}
+
+/* Extra Small Landscape Screens - Force Modal Behavior */
+@media (max-width: 768px) and (orientation: landscape) and (max-height: 500px) {
+  .checkout-overlay {
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 5px;
+  }
+  
+  .checkout-container {
+    width: min(500px, 95vw) !important;
+    height: min(420px, 95vh) !important;
+    max-height: 95vh !important;
+    border-radius: 15px !important;
+    overflow: hidden;
+  }
+  
+  .checkout-header {
+    padding: 10px 15px !important;
+    min-height: 50px;
+  }
+  
+  .checkout-header h2 {
+    font-size: 1.1rem !important;
+  }
+  
+  .checkout-content {
+    padding: 10px 15px 15px !important;
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .order-summary {
+    padding: 10px !important;
+    margin-bottom: 10px !important;
+  }
+  
+  .order-summary h3 {
+    font-size: 1rem !important;
+    margin-bottom: 10px !important;
+  }
+  
+  .order-item {
+    padding: 6px 0 !important;
+    gap: 6px !important;
+  }
+  
+  .order-item .item-name {
+    font-size: 0.85rem !important;
+  }
+  
+  .order-item .item-shop {
+    font-size: 0.7rem !important;
+  }
+  
+  .form-group {
+    margin-bottom: 10px !important;
+  }
+  
+  .form-group label {
+    font-size: 0.85rem !important;
+    margin-bottom: 4px !important;
+  }
+  
+  .form-group input,
+  .form-group textarea {
+    padding: 6px 8px !important;
+    font-size: 0.85rem !important;
+  }
+  
+  .pickup-note {
+    padding: 8px !important;
+    margin-top: 8px !important;
+  }
+  
+  .note-header {
+    font-size: 0.9rem !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .pickup-note li {
+    padding: 2px 0 !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .pay-now-btn {
+    padding: 8px 12px !important;
+    font-size: 0.9rem !important;
+    border-radius: 10px !important;
+    min-height: 36px !important;
+  }
+  
+  .payment-note {
+    font-size: 0.75rem !important;
   }
 }

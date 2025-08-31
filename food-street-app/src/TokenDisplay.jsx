@@ -55,6 +55,17 @@ function TokenDisplay({ orderData, onClose }) {
     return baseTimes[shopId] || 10
   }
 
+  const getStatusIcon = (status) => {
+    const icons = {
+      'confirmed': '✅',
+      'preparing': '👨‍🍳',
+      'ready': '🔔',
+      'completed': '🎉',
+      'cancelled': '❌'
+    }
+    return icons[status] || '📋'
+  }
+
   const copyTokenToClipboard = () => {
     navigator.clipboard.writeText(orderData.tokenNumber)
     setShowCopied(true)
@@ -85,9 +96,9 @@ function TokenDisplay({ orderData, onClose }) {
       <div className="token-container">
         {/* Success Header */}
         <div className="success-header">
-          <div className="success-icon">🎉</div>
-          <h2>Payment Successful!</h2>
-          <p>Your order has been confirmed and receipts are being printed</p>
+          <div className="success-icon">🎫</div>
+          <h2>Order Token</h2>
+          <p>Your order details and pickup information</p>
         </div>
 
         {/* Token Display */}
@@ -112,8 +123,10 @@ function TokenDisplay({ orderData, onClose }) {
             <span>₹{orderData.totalAmount}</span>
           </div>
           <div className="summary-row">
-            <span>Payment Status:</span>
-            <span className="status-paid">✅ PAID</span>
+            <span>Order Status:</span>
+            <span className={`status-${orderData.orderStatus || 'confirmed'}`}>
+              {getStatusIcon(orderData.orderStatus || 'confirmed')} {(orderData.orderStatus || 'confirmed').toUpperCase()}
+            </span>
           </div>
           <div className="summary-row">
             <span>Customer:</span>

@@ -1,18 +1,27 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from './AuthContext'
 import { useCart } from './CartContext'
 import { useToken } from './TokenContext'
 import Cart from './Cart'
-import TokenDisplay from './TokenDisplay'
+import OrderHistory from './OrderHistory'
 import './Navigation.css'
 
 function Navigation() {
   const { currentUser, logout } = useAuth()
   const { toggleCart, getTotalItems } = useCart()
-  const { latestOrder, hasActiveOrder, showTokenDialog, openTokenDialog, closeTokenDialog } = useToken()
+  const { hasActiveOrder } = useToken()
+  const [showOrderHistory, setShowOrderHistory] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
+
+  const handleTokenClick = () => {
+    setShowOrderHistory(true)
+  }
+
+  const closeOrderHistory = () => {
+    setShowOrderHistory(false)
+  }
 
   const handleLogout = async () => {
     try {
@@ -60,14 +69,14 @@ function Navigation() {
               📋 Orders
             </Link>
             
-            {hasActiveOrder && (
+            {(hasActiveOrder || currentUser) && (
               <button 
                 className="token-btn"
-                onClick={openTokenDialog}
-                title="View your token"
+                onClick={handleTokenClick}
+                title="View your order tokens"
               >
-                🎫 Token
-                <span className="token-indicator">!</span>
+                🎫 My Tokens
+                {hasActiveOrder && <span className="token-indicator">!</span>}
               </button>
             )}
             
@@ -103,13 +112,11 @@ function Navigation() {
       
       <Cart />
       
-      {/* Token Dialog */}
-      {showTokenDialog && latestOrder && (
-        <TokenDisplay 
-          orderData={latestOrder} 
-          onClose={closeTokenDialog} 
-        />
-      )}
+      {/* Order History Dialog */}
+      <OrderHistory 
+        isOpen={showOrderHistory}
+        onClose={closeOrderHistory}
+      />
     </>
   )
 }

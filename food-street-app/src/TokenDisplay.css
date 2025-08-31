@@ -192,6 +192,31 @@
   font-weight: 700 !important;
 }
 
+.status-confirmed {
+  color: #48bb78 !important;
+  font-weight: 700 !important;
+}
+
+.status-preparing {
+  color: #ed8936 !important;
+  font-weight: 700 !important;
+}
+
+.status-ready {
+  color: #667eea !important;
+  font-weight: 700 !important;
+}
+
+.status-completed {
+  color: #38a169 !important;
+  font-weight: 700 !important;
+}
+
+.status-cancelled {
+  color: #e53e3e !important;
+  font-weight: 700 !important;
+}
+
 /* Pickup Information */
 .pickup-info {
   padding: 20px;
