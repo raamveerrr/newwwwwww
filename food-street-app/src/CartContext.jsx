@@ -1,27 +1,56 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 
 const CartContext = createContext()
 
 export function useCart() {
-  return useContext(CartContext)
+  const context = useContext(CartContext)
+  if (!context) {
+    throw new Error('useCart must be used within a CartProvider')
+  }
+  return context
 }
 
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([])
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   // Load cart from localStorage on component mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('foodStreetCart')
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart))
+    try {
+      const savedCart = localStorage.getItem('foodStreetCart')
+      if (savedCart) {
+        const parsedCart = JSON.parse(savedCart)
+        // Validate cart data structure
+        if (Array.isArray(parsedCart)) {
+          setCartItems(parsedCart)
+        } else {
+          console.warn('Invalid cart data in localStorage, resetting cart')
+          localStorage.removeItem('foodStreetCart')
+        }
+      }
+    } catch (error) {
+      console.error('Error loading cart from localStorage:', error)
+      localStorage.removeItem('foodStreetCart')
+    } finally {
+      setIsLoading(false)
     }
   }, [])
 
-  // Save cart to localStorage whenever cartItems changes
+  // Save cart to localStorage whenever cartItems changes (debounced)
   useEffect(() => {
-    localStorage.setItem('foodStreetCart', JSON.stringify(cartItems))
-  }, [cartItems])
+    if (isLoading) return // Don't save while loading
+
+    const timeoutId = setTimeout(() => {
+      try {
+        localStorage.setItem('foodStreetCart', JSON.stringify(cartItems))
+      } catch (error) {
+        console.error('Error saving cart to localStorage:', error)
+      }
+    }, 100) // Debounce saves
+
+    return () => clearTimeout(timeoutId)
+  }, [cartItems, isLoading])
 
   // Add item to cart
   function addToCart(item, shopInfo) {

@@ -204,13 +204,20 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
     setIsProcessing(true)
 
     // Force production mode on Netlify regardless of Razorpay keys
-    const isNetlifyProduction = window.location.hostname.includes('netlify.app') || 
+    const isNetlifyProduction = window.location.hostname.includes('netlify.app') ||
                                window.location.hostname.includes('digitalfoodstreet')
-    
-    // Check if we should use mock payment (development mode)
-    const FORCE_REAL_RAZORPAY = false // Set to true to force real Razorpay payments
 
-    if (isDevelopmentMode() && !isNetlifyProduction && !FORCE_REAL_RAZORPAY) {
+    // Check if we should use mock payment (development mode)
+    const FORCE_REAL_RAZORPAY = true // Set to true to force real Razorpay payments
+
+    // Check if we have a valid Razorpay key for real payments
+    const razorpayKey = getRazorpayKey()
+    const hasValidRazorpayKey = razorpayKey &&
+                               razorpayKey.startsWith('rzp_') &&
+                               razorpayKey !== 'rzp_test_1234567890' &&
+                               razorpayKey.length > 20
+
+    if (isDevelopmentMode() && !isNetlifyProduction && !FORCE_REAL_RAZORPAY && !hasValidRazorpayKey) {
       console.log('🧪 Development mode detected - using mock payment')
       
       try {
@@ -227,8 +234,12 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
               
               // Handle successful mock payment
               const verification = await verifyPayment(response)
-              
+
               if (verification.success) {
+                // Log if this was a partial verification (development mode)
+                if (verification.partial) {
+                  console.log('🔄 Using partial payment verification (development mode)')
+                }
                 const tokenNumber = generateTokenNumber()
                 
                 const orderData = {
@@ -324,7 +335,7 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
       // Load Razorpay script dynamically
       const script = document.createElement('script')
       script.src = 'https://checkout.razorpay.com/v1/checkout.js'
-      script.onload = () => {
+      script.onload = async () => {
         let razorpayKey = getRazorpayKey()
 
         // Debug logging
@@ -346,6 +357,114 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
             isTestKey: razorpayKey === 'rzp_test_1234567890',
             length: razorpayKey?.length
           })
+
+          // For development, use mock payment if no valid key
+          if (isDevelopmentMode() && !isNetlifyProduction) {
+            console.log('🔄 No valid Razorpay key found - falling back to mock payment')
+            setIsProcessing(false)
+
+            // Use mock payment
+            try {
+              await mockPayment(
+                getTotalPrice(),
+                async (response) => {
+                  try {
+                    console.log('📝 Mock payment response received')
+
+                    // Validate response
+                    if (!response || !response.razorpay_payment_id) {
+                      throw new Error('Invalid payment response')
+                    }
+
+                    // Handle successful mock payment
+                    const verification = await verifyPayment(response)
+
+                    if (verification.success) {
+                      const tokenNumber = generateTokenNumber()
+
+                      const orderData = {
+                        userId: currentUser.uid,
+                        customerInfo,
+                        items: cartItems,
+                        totalAmount: getTotalPrice(),
+                        paymentId: response.razorpay_payment_id,
+                        orderId: response.razorpay_order_id,
+                        signature: response.razorpay_signature,
+                        tokenNumber: tokenNumber,
+                        status: 'paid',
+                        orderStatus: 'confirmed',
+                        orderType: 'pickup',
+                        mockPayment: true // Flag for development
+                      }
+
+                      console.log('📝 Creating order...')
+                      const firestoreOrderId = await createOrderInFirestore(orderData)
+
+                      const completedOrderData = {
+                        ...orderData,
+                        firestoreOrderId,
+                        orderNumber: `FS${Date.now()}`
+                      }
+
+                      // Add tokens to each shop that has items in the order
+                      const shopTokens = {}
+                      completedOrderData.items.forEach(item => {
+                        if (!shopTokens[item.shopId]) {
+                          shopTokens[item.shopId] = {
+                            shopName: item.shopName,
+                            shopId: item.shopId,
+                            items: [],
+                            totalAmount: 0
+                          }
+                        }
+                        shopTokens[item.shopId].items.push(item)
+                        shopTokens[item.shopId].totalAmount += item.price * item.quantity
+                      })
+
+                      // Add token to each shop
+                      Object.values(shopTokens).forEach(shopData => {
+                        const shopTokenData = {
+                          tokenNumber: completedOrderData.tokenNumber,
+                          shopName: shopData.shopName,
+                          shopId: shopData.shopId,
+                          items: shopData.items,
+                          totalAmount: shopData.totalAmount,
+                          orderStatus: 'confirmed',
+                          customerInfo: completedOrderData.customerInfo,
+                          firestoreOrderId: completedOrderData.firestoreOrderId,
+                          timestamp: new Date().toISOString()
+                        }
+                        addShopToken(shopData.shopId, shopTokenData)
+                      })
+
+                      setCompletedOrder(completedOrderData)
+                      clearCart() // Clear cart immediately after successful payment
+                      onOrderSuccess(completedOrderData)
+
+                      // Show payment success dialog
+                      setShowPaymentSuccess(true)
+                    } else {
+                      throw new Error('Payment verification failed')
+                    }
+                  } catch (paymentError) {
+                    console.error('Payment processing error:', paymentError)
+                    const errorMessage = paymentError.message || 'Unknown payment error'
+                    alert(`Payment failed: ${errorMessage}`)
+                  }
+                },
+                (error) => {
+                  console.error('Mock payment error:', error)
+                  alert('Payment failed. Please try again.')
+                }
+              )
+            } catch (error) {
+              console.error('Mock payment error:', error)
+              alert('Payment failed. Please try again.')
+            } finally {
+              setIsProcessing(false)
+            }
+            return
+          }
 
           // Try fallback test key for development
           const fallbackKey = 'rzp_test_your_test_key_here' // Replace with actual test key
@@ -375,8 +494,12 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
               try {
                 // Verify payment (in production, do this on backend)
                 const verification = await verifyPayment(response)
-                
+
                 if (verification.success) {
+                  // Log if this was a partial verification (development mode)
+                  if (verification.partial) {
+                    console.log('🔄 Using partial payment verification (development mode)')
+                  }
                   // Generate unique token number
                   const tokenNumber = generateTokenNumber()
                   

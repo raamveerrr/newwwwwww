@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom'
 import { AuthProvider, useAuth } from './AuthContext'
 import { CartProvider } from './CartContext'
@@ -124,9 +124,21 @@ const shops = [
 function LandingPage() {
   const { currentUser, userProfile, logout } = useAuth()
   const [showLogoutDialog, setShowLogoutDialog] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('all')
+
+  // Simulate loading state for premium UX
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 1200) // Premium loading experience
+    return () => clearTimeout(timer)
+  }, [])
 
   // Pull-to-refresh functionality - only refreshes when at very top
   const handleRefresh = async () => {
+    setIsLoading(true)
     // Simulate a brief refresh delay like professional websites
     await new Promise(resolve => setTimeout(resolve, 800))
     // Reload the page to refresh all data
@@ -238,42 +250,116 @@ function LandingPage() {
         <h2 className="section-title">
           Choose Your Favorite Shop
         </h2>
-        
-        <div className="shops-grid">
-          {shops.map((shop) => (
-            <div
-              key={shop.id}
-              className={`shop-card ${shop.color}`}
+
+        {/* Enhanced Search and Filters */}
+        <div className="search-filters-container">
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder="Search shops..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+            <span className="search-icon">🔍</span>
+          </div>
+
+          <div className="category-filters">
+            <button
+              className={`filter-btn ${selectedCategory === 'all' ? 'active' : ''}`}
+              onClick={() => setSelectedCategory('all')}
             >
-              <div className="shop-background">
-                <div className="shop-emoji">{shop.image}</div>
-              </div>
-              
-              <div className="shop-info">
-                <h3 className="shop-name">{shop.name}</h3>
-                <p className="shop-description">{shop.description}</p>
-                
-                <div className="shop-meta">
-                  <div className="rating">
-                    <span className="star-icon">⭐</span>
-                    <span>{shop.rating}</span>
-                  </div>
-                  <div className="time">
-                    <span className="clock-icon">⏰</span>
-                    <span>{shop.time}</span>
-                  </div>
-                </div>
-                
-                <div className="shop-buttons">
-                  <button className="order-button" onClick={() => handleOrderClick(shop.id)}>
-                    View Menu
-                    <span className="arrow-icon">→</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+              All Shops
+            </button>
+            <button
+              className={`filter-btn ${selectedCategory === 'food' ? 'active' : ''}`}
+              onClick={() => setSelectedCategory('food')}
+            >
+              🍕 Food
+            </button>
+            <button
+              className={`filter-btn ${selectedCategory === 'drinks' ? 'active' : ''}`}
+              onClick={() => setSelectedCategory('drinks')}
+            >
+              🥤 Drinks
+            </button>
+            <button
+              className={`filter-btn ${selectedCategory === 'healthy' ? 'active' : ''}`}
+              onClick={() => setSelectedCategory('healthy')}
+            >
+              🥗 Healthy
+            </button>
+          </div>
         </div>
+
+        {/* Skeleton Loading State */}
+        {isLoading ? (
+          <div className="shops-grid">
+            {[...Array(4)].map((_, index) => (
+              <div key={index} className="shop-card skeleton">
+                <div className="shop-background skeleton-bg">
+                  <div className="skeleton-emoji"></div>
+                </div>
+                <div className="shop-info">
+                  <div className="skeleton-title"></div>
+                  <div className="skeleton-text"></div>
+                  <div className="skeleton-meta">
+                    <div className="skeleton-rating"></div>
+                    <div className="skeleton-time"></div>
+                  </div>
+                  <div className="skeleton-button"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="shops-grid">
+            {shops
+              .filter((shop) => {
+                const matchesSearch = shop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                    shop.description.toLowerCase().includes(searchQuery.toLowerCase())
+                const matchesCategory = selectedCategory === 'all' ||
+                                      (selectedCategory === 'food' && ['zuzu', 'bites'].includes(shop.color)) ||
+                                      (selectedCategory === 'drinks' && shop.color === 'shakers') ||
+                                      (selectedCategory === 'healthy' && shop.color === 'oasis')
+                return matchesSearch && matchesCategory
+              })
+              .map((shop, index) => (
+                <div
+                  key={shop.id}
+                  className={`shop-card ${shop.color} fade-in-up`}
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="shop-background">
+                    <div className="shop-emoji">{shop.image}</div>
+                  </div>
+
+                  <div className="shop-info">
+                    <h3 className="shop-name">{shop.name}</h3>
+                    <p className="shop-description">{shop.description}</p>
+
+                    <div className="shop-meta">
+                      <div className="rating">
+                        <span className="star-icon">⭐</span>
+                        <span>{shop.rating}</span>
+                      </div>
+                      <div className="time">
+                        <span className="clock-icon">⏰</span>
+                        <span>{shop.time}</span>
+                      </div>
+                    </div>
+
+                    <div className="shop-buttons">
+                      <button className="order-button" onClick={() => handleOrderClick(shop.id)}>
+                        View Menu
+                        <span className="arrow-icon">→</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
       </main>
       
       {/* Footer with Policy Links */}

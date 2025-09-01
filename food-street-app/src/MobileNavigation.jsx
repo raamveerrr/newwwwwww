@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from './AuthContext'
 import { useCart } from './CartContext'
@@ -10,10 +10,10 @@ function MobileNavigation() {
   const location = useLocation()
   const navigate = useNavigate()
   const { currentUser, userProfile } = useAuth()
-  const { getTotalItems, toggleCart } = useCart()
+  const { getTotalItems, toggleCart, isCartOpen } = useCart()
   const { hasActiveOrder, latestOrder, showTokenDialog, openTokenDialog, closeTokenDialog } = useToken()
 
-  // Don't show on auth pages
+  // Don't show on auth pages or admin pages
   if (!currentUser || location.pathname.includes('/admin')) {
     return null
   }
@@ -26,77 +26,81 @@ function MobileNavigation() {
     }
   }
 
-  // Show back button on menu pages
-  const showBackButton = location.pathname.includes('/menu/') || 
+  // Show back button on menu pages and orders page
+  const showBackButton = location.pathname.includes('/menu/') ||
                         location.pathname === '/orders'
 
-  const navItems = [
-    {
-      path: '/',
-      icon: '🏠',
-      label: 'Home',
-      active: location.pathname === '/'
-    },
-    {
-      path: '/orders',
-      icon: '📋',
-      label: 'Orders',
-      active: location.pathname === '/orders'
-    },
-
-
-    {
-      path: '#cart',
-      icon: '🛒',
-      label: 'Cart',
-      active: false,
-      onClick: (e) => {
-        e.preventDefault()
-        toggleCart()
-        // Haptic feedback
-        if (navigator.vibrate) {
-          navigator.vibrate(25)
-        }
+  // Memoize navigation items to prevent unnecessary re-renders
+  const navItems = useMemo(() => {
+    const items = [
+      {
+        path: '/',
+        icon: '🏠',
+        label: 'Home',
+        active: location.pathname === '/'
       },
-      badge: getTotalItems()
-    }
-  ]
-
-  // Add admin option for admin users
-  if (userProfile?.userType === 'admin') {
-    navItems.splice(2, 0, {
-      path: '/admin',
-      icon: '⚙️',
-      label: 'Admin',
-      active: location.pathname === '/admin'
-    })
-  }
-
-  // Add back button if needed
-  if (showBackButton) {
-    navItems.unshift({
-      icon: '←',
-      label: 'Back',
-      onClick: (e) => {
-        e.preventDefault()
-        handleBackClick()
-        if (navigator.vibrate) {
-          navigator.vibrate(15)
-        }
+      {
+        path: '/orders',
+        icon: '📋',
+        label: 'Orders',
+        active: location.pathname === '/orders'
+      },
+      {
+        path: '#cart',
+        icon: '🛒',
+        label: 'Cart',
+        active: isCartOpen, // Use cart open state for active indication
+        onClick: (e) => {
+          e.preventDefault()
+          toggleCart()
+          // Haptic feedback
+          if (navigator.vibrate) {
+            navigator.vibrate(25)
+          }
+        },
+        badge: getTotalItems()
       }
-    })
-  }
+    ]
+
+    // Add admin option for admin users
+    if (userProfile?.userType === 'admin') {
+      items.splice(2, 0, {
+        path: '/admin',
+        icon: '⚙️',
+        label: 'Admin',
+        active: location.pathname === '/admin'
+      })
+    }
+
+    // Add back button if needed
+    if (showBackButton) {
+      items.unshift({
+        icon: '←',
+        label: 'Back',
+        onClick: (e) => {
+          e.preventDefault()
+          handleBackClick()
+          if (navigator.vibrate) {
+            navigator.vibrate(15)
+          }
+        }
+      })
+    }
+
+    return items
+  }, [location.pathname, userProfile?.userType, showBackButton, getTotalItems, isCartOpen, toggleCart])
 
   return (
     <nav className="mobile-nav">
       <div className="mobile-nav-container">
-        {navItems.filter(item => !item.hidden && item.label !== 'Token').map((item, index) => {
+        {navItems.map((item, index) => {
           if (item.onClick) {
             return (
               <button
-                key={index}
+                key={`${item.label}-${index}`}
                 className={`mobile-nav-item ${item.active ? 'active' : ''}`}
                 onClick={item.onClick}
+                aria-label={`${item.label}${item.badge > 0 ? ` (${item.badge} items)` : ''}`}
               >
                 <div className="nav-icon-container">
                   <span className="nav-icon">{item.icon}</span>
@@ -111,7 +115,7 @@ function MobileNavigation() {
 
           return (
             <Link
-              key={index}
+              key={`${item.label}-${index}`}
               to={item.path}
               className={`mobile-nav-item ${item.active ? 'active' : ''}`}
               onClick={() => {
@@ -120,6 +124,7 @@ function MobileNavigation() {
                   navigator.vibrate(15)
                 }
               }}
+              aria-label={`${item.label}${item.badge > 0 ? ` (${item.badge} items)` : ''}`}
             >
               <div className="nav-icon-container">
                 <span className="nav-icon">{item.icon}</span>
@@ -132,12 +137,12 @@ function MobileNavigation() {
           )
         })}
       </div>
-      
+
       {/* Token Dialog */}
       {showTokenDialog && latestOrder && (
-        <TokenDisplay 
-          orderData={latestOrder} 
-          onClose={closeTokenDialog} 
+        <TokenDisplay
+          orderData={latestOrder}
+          onClose={closeTokenDialog}
         />
       )}
     </nav>
