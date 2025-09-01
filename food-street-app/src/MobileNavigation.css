@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿/* Enhanced Mobile-First Navigation Styles */
+﻿﻿/* Enhanced Mobile-First Navigation Styles */
 .mobile-nav {
   position: fixed;
   bottom: 0;
@@ -8,13 +8,16 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  z-index: 1050; /* Increased z-index to ensure it's above other elements */
   box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
   padding: env(safe-area-inset-bottom) 0 0 0;
   display: none; /* Hidden by default, shown on mobile */
   /* Enhanced mobile support */
   height: clamp(60px, 12vh, 80px);
   touch-action: manipulation;
+  /* Ensure proper stacking context */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .mobile-nav-container {

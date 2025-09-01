@@ -14,12 +14,13 @@ export function TokenProvider({ children }) {
   const [latestOrder, setLatestOrder] = useState(null)
   const [shopTokens, setShopTokens] = useState({})
   const [showTokenDialog, setShowTokenDialog] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   // Load latest order from localStorage on mount
   useEffect(() => {
-    const savedOrder = localStorage.getItem('foodstreet_latest_order')
-    if (savedOrder) {
-      try {
+    try {
+      const savedOrder = localStorage.getItem('foodstreet_latest_order')
+      if (savedOrder) {
         const orderData = JSON.parse(savedOrder)
         // Only keep recent orders (within last 24 hours)
         const orderTime = new Date(orderData.timestamp)
@@ -31,10 +32,30 @@ export function TokenProvider({ children }) {
         } else {
           localStorage.removeItem('foodstreet_latest_order')
         }
-      } catch (error) {
-        console.error('Error loading saved order:', error)
-        localStorage.removeItem('foodstreet_latest_order')
       }
+    } catch (error) {
+      console.error('Error loading saved order:', error)
+      localStorage.removeItem('foodstreet_latest_order')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  // Load shop tokens from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedTokens = localStorage.getItem('foodstreet_shop_tokens')
+      if (savedTokens) {
+        const parsedTokens = JSON.parse(savedTokens)
+        if (parsedTokens && typeof parsedTokens === 'object') {
+          setShopTokens(parsedTokens)
+        } else {
+          localStorage.removeItem('foodstreet_shop_tokens')
+        }
+      }
+    } catch (error) {
+      console.error('Error loading shop tokens:', error)
+      localStorage.removeItem('foodstreet_shop_tokens')
     }
   }, [])
 
@@ -124,7 +145,8 @@ export function TokenProvider({ children }) {
     getShopToken,
     setShopToken,
     clearShopToken,
-    hasShopToken
+    hasShopToken,
+    addShopToken
   }
 
   return (
