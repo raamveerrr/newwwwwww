@@ -12,7 +12,7 @@ git push origin main
 
 ### 2. Login to Netlify
 - Go to [netlify.com](https://netlify.com)
-- Sign up/Login with GitHub (recommended)
+- Sign up /Login with GitHub (recommended)
 
 ### 3. Deploy from Git Repository
 1. Click "Add new site" → "Import an existing project"
