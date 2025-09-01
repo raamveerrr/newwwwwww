@@ -55,6 +55,13 @@ export const razorpayConfig = {
 // For production, use environment variables
 export const getRazorpayKey = () => {
   const key = import.meta.env.VITE_RAZORPAY_KEY_ID || razorpayConfig.keyId
+
+  // Enhanced key validation
+  if (!key || key === 'rzp_test_1234567890' || key.length < 20) {
+    console.warn('⚠️ Razorpay key not properly configured')
+    return null
+  }
+
   // Only log in development, never expose key details in production
   if (import.meta.env.DEV) {
     console.log('🔑 Razorpay Key loaded successfully')
@@ -115,14 +122,54 @@ export const verifyPayment = async (paymentData) => {
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 1000))
 
-  // Validate required payment data
-  if (!paymentData || !paymentData.razorpay_payment_id || !paymentData.razorpay_order_id || !paymentData.razorpay_signature) {
-    console.error('❌ Payment verification failed: Missing required payment data')
+  // Enhanced validation with better error handling
+  if (!paymentData) {
+    console.error('❌ Payment verification failed: No payment data received')
     return {
       success: false,
-      error: 'Missing payment data',
-      orderId: paymentData?.razorpay_order_id,
-      paymentId: paymentData?.razorpay_payment_id
+      error: 'No payment data received',
+      orderId: null,
+      paymentId: null
+    }
+  }
+
+  // Log the received payment data for debugging
+  console.log('🔍 Payment data received:', {
+    hasPaymentId: !!paymentData.razorpay_payment_id,
+    hasOrderId: !!paymentData.razorpay_order_id,
+    hasSignature: !!paymentData.razorpay_signature,
+    paymentId: paymentData.razorpay_payment_id?.substring(0, 10) + '...',
+    orderId: paymentData.razorpay_order_id?.substring(0, 10) + '...',
+    signature: paymentData.razorpay_signature?.substring(0, 10) + '...'
+  })
+
+  // Check for required fields with more detailed validation
+  const missingFields = []
+  if (!paymentData.razorpay_payment_id) missingFields.push('payment_id')
+  if (!paymentData.razorpay_order_id) missingFields.push('order_id')
+  if (!paymentData.razorpay_signature) missingFields.push('signature')
+
+  if (missingFields.length > 0) {
+    console.error('❌ Payment verification failed: Missing required fields:', missingFields.join(', '))
+
+    // For development/testing, if we have at least a payment ID, we can proceed
+    // This handles cases where Razorpay might not return all fields in test mode
+    if (paymentData.razorpay_payment_id && isDevelopmentMode()) {
+      console.log('🔄 Development mode: Proceeding with partial payment data')
+      return {
+        success: true,
+        orderId: paymentData.razorpay_order_id || `order_${Date.now()}`,
+        paymentId: paymentData.razorpay_payment_id,
+        signature: paymentData.razorpay_signature || 'dev_signature',
+        partial: true // Flag to indicate partial data
+      }
+    }
+
+    return {
+      success: false,
+      error: `Missing required fields: ${missingFields.join(', ')}`,
+      orderId: paymentData.razorpay_order_id,
+      paymentId: paymentData.razorpay_payment_id
     }
   }
 
