@@ -55,6 +55,13 @@ export const razorpayConfig = {
 // For production, use environment variables
 export const getRazorpayKey = () => {
   const key = import.meta.env.VITE_RAZORPAY_KEY_ID || razorpayConfig.keyId
+
+  // Enhanced key validation
+  if (!key || key === 'rzp_test_1234567890' || key.length < 20) {
+    console.warn('⚠️ Razorpay key not properly configured')
+    return null
+  }
+
   // Only log in development, never expose key details in production
   if (import.meta.env.DEV) {
     console.log('🔑 Razorpay Key loaded successfully')
