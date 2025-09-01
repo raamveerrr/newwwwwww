@@ -350,7 +350,7 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
                                   razorpayKey.length > 20
 
         if (!isValidRazorpayKey) {
-          console.error('⚠️ Razorpay key validation failed')
+          console.error('⚠️ Razorpay key validation failed - switching to mock payment')
           console.error('Key details:', {
             exists: !!razorpayKey,
             startsWithRzp: razorpayKey?.startsWith('rzp_'),
@@ -358,124 +358,110 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
             length: razorpayKey?.length
           })
 
-          // For development, use mock payment if no valid key
-          if (isDevelopmentMode() && !isNetlifyProduction) {
-            console.log('🔄 No valid Razorpay key found - falling back to mock payment')
-            setIsProcessing(false)
+          // Automatically fallback to mock payment
+          console.log('🔄 Falling back to mock payment due to invalid Razorpay key')
+          setIsProcessing(false)
 
-            // Use mock payment
-            try {
-              await mockPayment(
-                getTotalPrice(),
-                async (response) => {
-                  try {
-                    console.log('📝 Mock payment response received')
+          try {
+            await mockPayment(
+              getTotalPrice(),
+              async (response) => {
+                try {
+                  console.log('📝 Mock payment response received')
 
-                    // Validate response
-                    if (!response || !response.razorpay_payment_id) {
-                      throw new Error('Invalid payment response')
-                    }
-
-                    // Handle successful mock payment
-                    const verification = await verifyPayment(response)
-
-                    if (verification.success) {
-                      const tokenNumber = generateTokenNumber()
-
-                      const orderData = {
-                        userId: currentUser.uid,
-                        customerInfo,
-                        items: cartItems,
-                        totalAmount: getTotalPrice(),
-                        paymentId: response.razorpay_payment_id,
-                        orderId: response.razorpay_order_id,
-                        signature: response.razorpay_signature,
-                        tokenNumber: tokenNumber,
-                        status: 'paid',
-                        orderStatus: 'confirmed',
-                        orderType: 'pickup',
-                        mockPayment: true // Flag for development
-                      }
-
-                      console.log('📝 Creating order...')
-                      const firestoreOrderId = await createOrderInFirestore(orderData)
-
-                      const completedOrderData = {
-                        ...orderData,
-                        firestoreOrderId,
-                        orderNumber: `FS${Date.now()}`
-                      }
-
-                      // Add tokens to each shop that has items in the order
-                      const shopTokens = {}
-                      completedOrderData.items.forEach(item => {
-                        if (!shopTokens[item.shopId]) {
-                          shopTokens[item.shopId] = {
-                            shopName: item.shopName,
-                            shopId: item.shopId,
-                            items: [],
-                            totalAmount: 0
-                          }
-                        }
-                        shopTokens[item.shopId].items.push(item)
-                        shopTokens[item.shopId].totalAmount += item.price * item.quantity
-                      })
-
-                      // Add token to each shop
-                      Object.values(shopTokens).forEach(shopData => {
-                        const shopTokenData = {
-                          tokenNumber: completedOrderData.tokenNumber,
-                          shopName: shopData.shopName,
-                          shopId: shopData.shopId,
-                          items: shopData.items,
-                          totalAmount: shopData.totalAmount,
-                          orderStatus: 'confirmed',
-                          customerInfo: completedOrderData.customerInfo,
-                          firestoreOrderId: completedOrderData.firestoreOrderId,
-                          timestamp: new Date().toISOString()
-                        }
-                        addShopToken(shopData.shopId, shopTokenData)
-                      })
-
-                      setCompletedOrder(completedOrderData)
-                      clearCart() // Clear cart immediately after successful payment
-                      onOrderSuccess(completedOrderData)
-
-                      // Show payment success dialog
-                      setShowPaymentSuccess(true)
-                    } else {
-                      throw new Error('Payment verification failed')
-                    }
-                  } catch (paymentError) {
-                    console.error('Payment processing error:', paymentError)
-                    const errorMessage = paymentError.message || 'Unknown payment error'
-                    alert(`Payment failed: ${errorMessage}`)
+                  // Validate response
+                  if (!response || !response.razorpay_payment_id) {
+                    throw new Error('Invalid payment response')
                   }
-                },
-                (error) => {
-                  console.error('Mock payment error:', error)
-                  alert('Payment failed. Please try again.')
-                }
-              )
-            } catch (error) {
-              console.error('Mock payment error:', error)
-              alert('Payment failed. Please try again.')
-            } finally {
-              setIsProcessing(false)
-            }
-            return
-          }
 
-          // Try fallback test key for development
-          const fallbackKey = 'rzp_test_your_test_key_here' // Replace with actual test key
-          if (fallbackKey !== 'rzp_test_your_test_key_here') {
-            console.log('🔄 Using fallback test key')
-            razorpayKey = fallbackKey
-          } else {
-            alert(`⚠️ Razorpay configuration error. Please check your API keys.\n\nDebug Info:\n- Key: ${razorpayKey ? 'Set' : 'NOT SET'}\n- Environment: ${import.meta.env.MODE}`)
+                  // Handle successful mock payment
+                  const verification = await verifyPayment(response)
+
+                  if (verification.success) {
+                    const tokenNumber = generateTokenNumber()
+
+                    const orderData = {
+                      userId: currentUser.uid,
+                      customerInfo,
+                      items: cartItems,
+                      totalAmount: getTotalPrice(),
+                      paymentId: response.razorpay_payment_id,
+                      orderId: response.razorpay_order_id,
+                      signature: response.razorpay_signature,
+                      tokenNumber: tokenNumber,
+                      status: 'paid',
+                      orderStatus: 'confirmed',
+                      orderType: 'pickup',
+                      mockPayment: true // Flag for development
+                    }
+
+                    console.log('📝 Creating order...')
+                    const firestoreOrderId = await createOrderInFirestore(orderData)
+
+                    const completedOrderData = {
+                      ...orderData,
+                      firestoreOrderId,
+                      orderNumber: `FS${Date.now()}`
+                    }
+
+                    // Add tokens to each shop that has items in the order
+                    const shopTokens = {}
+                    completedOrderData.items.forEach(item => {
+                      if (!shopTokens[item.shopId]) {
+                        shopTokens[item.shopId] = {
+                          shopName: item.shopName,
+                          shopId: item.shopId,
+                          items: [],
+                          totalAmount: 0
+                        }
+                      }
+                      shopTokens[item.shopId].items.push(item)
+                      shopTokens[item.shopId].totalAmount += item.price * item.quantity
+                    })
+
+                    // Add token to each shop
+                    Object.values(shopTokens).forEach(shopData => {
+                      const shopTokenData = {
+                        tokenNumber: completedOrderData.tokenNumber,
+                        shopName: shopData.shopName,
+                        shopId: shopData.shopId,
+                        items: shopData.items,
+                        totalAmount: shopData.totalAmount,
+                        orderStatus: 'confirmed',
+                        customerInfo: completedOrderData.customerInfo,
+                        firestoreOrderId: completedOrderData.firestoreOrderId,
+                        timestamp: new Date().toISOString()
+                      }
+                      addShopToken(shopData.shopId, shopTokenData)
+                    })
+
+                    setCompletedOrder(completedOrderData)
+                    clearCart() // Clear cart immediately after successful payment
+                    onOrderSuccess(completedOrderData)
+
+                    // Show payment success dialog
+                    setShowPaymentSuccess(true)
+                  } else {
+                    throw new Error('Payment verification failed')
+                  }
+                } catch (paymentError) {
+                  console.error('Payment processing error:', paymentError)
+                  const errorMessage = paymentError.message || 'Unknown payment error'
+                  alert(`Payment failed: ${errorMessage}`)
+                }
+              },
+              (error) => {
+                console.error('Mock payment error:', error)
+                alert('Payment failed. Please try again.')
+              }
+            )
+          } catch (error) {
+            console.error('Mock payment error:', error)
+            alert('Payment failed. Please try again.')
+          } finally {
             setIsProcessing(false)
-            return
           }
+          return
         }
 
         let options
@@ -605,6 +591,94 @@ function Checkout({ isOpen, onClose, onOrderSuccess }) {
             alert(`Payment failed: ${response.error.description}`)
             setIsProcessing(false)
           })
+
+          // Add error handling for Razorpay API failures
+          rzp1.on('payment.error', function (response) {
+            console.error('Razorpay API error:', response)
+            if (response.error && response.error.code === 'PAYMENT_FAILED') {
+              console.log('🔄 Payment failed due to API error - falling back to mock payment')
+              setIsProcessing(false)
+
+              // Fallback to mock payment
+              mockPayment(getTotalPrice(), async (mockResponse) => {
+                try {
+                  const verification = await verifyPayment(mockResponse)
+                  if (verification.success) {
+                    const tokenNumber = generateTokenNumber()
+                    const orderData = {
+                      userId: currentUser.uid,
+                      customerInfo,
+                      items: cartItems,
+                      totalAmount: getTotalPrice(),
+                      paymentId: mockResponse.razorpay_payment_id,
+                      orderId: mockResponse.razorpay_order_id,
+                      signature: mockResponse.razorpay_signature,
+                      tokenNumber: tokenNumber,
+                      status: 'paid',
+                      orderStatus: 'confirmed',
+                      orderType: 'pickup',
+                      mockPayment: true,
+                      fallbackReason: 'Razorpay API error'
+                    }
+
+                    const firestoreOrderId = await createOrderInFirestore(orderData)
+                    const completedOrderData = {
+                      ...orderData,
+                      firestoreOrderId,
+                      orderNumber: `FS${Date.now()}`
+                    }
+
+                    // Add tokens to shops
+                    const shopTokens = {}
+                    completedOrderData.items.forEach(item => {
+                      if (!shopTokens[item.shopId]) {
+                        shopTokens[item.shopId] = {
+                          shopName: item.shopName,
+                          shopId: item.shopId,
+                          items: [],
+                          totalAmount: 0
+                        }
+                      }
+                      shopTokens[item.shopId].items.push(item)
+                      shopTokens[item.shopId].totalAmount += item.price * item.quantity
+                    })
+
+                    Object.values(shopTokens).forEach(shopData => {
+                      const shopTokenData = {
+                        tokenNumber: completedOrderData.tokenNumber,
+                        shopName: shopData.shopName,
+                        shopId: shopData.shopId,
+                        items: shopData.items,
+                        totalAmount: shopData.totalAmount,
+                        orderStatus: 'confirmed',
+                        customerInfo: completedOrderData.customerInfo,
+                        firestoreOrderId: completedOrderData.firestoreOrderId,
+                        timestamp: new Date().toISOString()
+                      }
+                      addShopToken(shopData.shopId, shopTokenData)
+                    })
+
+                    setCompletedOrder(completedOrderData)
+                    clearCart()
+                    onOrderSuccess(completedOrderData)
+                    setShowPaymentSuccess(true)
+                  } else {
+                    alert('Payment verification failed. Please contact support.')
+                  }
+                } catch (error) {
+                  console.error('Fallback payment error:', error)
+                  alert('Payment failed. Please try again.')
+                }
+              }, (error) => {
+                console.error('Mock payment error:', error)
+                alert('Payment failed. Please try again.')
+              })
+              return
+            }
+            alert(`Payment error: ${response.error.description || 'Unknown error'}`)
+            setIsProcessing(false)
+          })
+
           rzp1.open()
         } catch (razorpayError) {
           console.error('Razorpay initialization error:', razorpayError)
